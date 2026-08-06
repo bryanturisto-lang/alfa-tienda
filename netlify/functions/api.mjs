@@ -22,6 +22,54 @@ function db() {
   return supabase;
 }
 
+// --------------------- Evolution API (WhatsApp) ---------------------
+const EVOLUTION_URL = (process.env.ALFA_EVOLUTION_URL || "").replace(/\/+$/, "");
+const EVOLUTION_APIKEY = process.env.ALFA_EVOLUTION_APIKEY;
+const EVOLUTION_INSTANCIA = process.env.ALFA_EVOLUTION_INSTANCIA;
+const EVOLUTION_GRUPO_INTERNO = process.env.ALFA_EVOLUTION_GRUPO_INTERNO; // ej: 120363012345678901@g.us
+
+function evolutionListo() {
+  return !!(EVOLUTION_URL && EVOLUTION_APIKEY && EVOLUTION_INSTANCIA);
+}
+
+// Convierte un teléfono venezolano tipo "0412-1234567" o "+58 412-1234567"
+// al formato que espera WhatsApp: 584121234567
+function normalizarNumeroVE(numero) {
+  if (!numero) return null;
+  let d = String(numero).replace(/\D/g, "");
+  if (d.startsWith("58") && d.length === 12) return d;
+  if (d.startsWith("0") && d.length === 11) return "58" + d.slice(1);
+  if (d.length === 10) return "58" + d;
+  return d || null;
+}
+
+// Envía un mensaje de texto. Nunca lanza error hacia arriba: si Evolution
+// no está configurado o falla, solo lo registra en la bitácora — un
+// problema de WhatsApp jamás debe tumbar la creación/actualización de un pedido.
+async function enviarWhatsApp(sb, numeroDestino, texto, refPedido) {
+  if (!evolutionListo()) return;
+  const numero = numeroDestino.includes("@g.us") ? numeroDestino : normalizarNumeroVE(numeroDestino);
+  if (!numero) return;
+  try {
+    const resp = await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INSTANCIA}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", apikey: EVOLUTION_APIKEY },
+      body: JSON.stringify({ number: numero, text: texto }),
+    });
+    if (!resp.ok) {
+      const detalle = await resp.text().catch(() => "");
+      if (sb) await sb.from("bitacora").insert({ tipo: "whatsapp-error", mensaje: `Fallo al enviar a ${numero}: ${resp.status} ${detalle}`.slice(0, 500), referencia: refPedido || null });
+    }
+  } catch (e) {
+    if (sb) await sb.from("bitacora").insert({ tipo: "whatsapp-error", mensaje: `Excepción al enviar a ${numero}: ${e.message}`.slice(0, 500), referencia: refPedido || null });
+  }
+}
+
+async function notificarGrupoInterno(sb, texto, ref) {
+  if (!EVOLUTION_GRUPO_INTERNO) return;
+  await enviarWhatsApp(sb, EVOLUTION_GRUPO_INTERNO, texto, ref);
+}
+
 const PERMISOS = {
   admin: ["panel", "pedidos", "pagos", "inventario", "envios", "clientes", "reportes", "configuracion", "bitacora"],
   ventas: ["panel", "pedidos", "pagos", "clientes"],
@@ -305,6 +353,17 @@ export default async (req, context) => {
         rol: null,
       });
 
+      const totalTxt = `$${body.totales?.total ?? "?"}`;
+      const telCliente = body.cliente?.telefono;
+      if (telCliente) {
+        await enviarWhatsApp(sb, telCliente,
+          `¡Hola ${body.cliente?.nombre || ""}! Recibimos tu pedido *${codigo}* por ${totalTxt}. Te avisamos apenas verifiquemos el pago. Gracias por comprar en Alfa 💻`,
+          codigo);
+      }
+      await notificarGrupoInterno(sb,
+        `🛒 Nuevo pedido *${codigo}* — ${totalTxt}\nCliente: ${body.cliente?.nombre || "?"}\nEntrega: ${body.entrega?.modo || "?"}`,
+        codigo);
+
       return json(201, pedidoDesdeFila(fila));
     }
 
@@ -329,9 +388,26 @@ export default async (req, context) => {
       if (nombre === "catalogo") {
         if (!permisosRol.includes("inventario")) return error(403, "Tu rol no tiene permiso de inventario.");
         if (!Array.isArray(body)) return error(400, "Se esperaba un arreglo de productos.");
+
+        const UMBRAL_STOCK_BAJO = 3;
+        const ids = body.map((p) => p.id).filter(Boolean);
+        const { data: previos } = await sb.from("productos").select("id, stock").in("id", ids);
+        const stockAntes = new Map((previos || []).map((p) => [p.id, p.stock]));
+
         const filas = body.map(filaDesdeProducto);
         const { error: err } = await sb.from("productos").upsert(filas, { onConflict: "id" });
         if (err) throw err;
+
+        for (const p of body) {
+          const antes = stockAntes.get(p.id);
+          if (antes === undefined || antes === p.stock) continue;
+          if (p.stock === 0 && antes > 0) {
+            await notificarGrupoInterno(sb, `🚫 *${p.nombre}* se quedó sin stock.`, p.id);
+          } else if (p.stock > 0 && p.stock <= UMBRAL_STOCK_BAJO && antes > UMBRAL_STOCK_BAJO) {
+            await notificarGrupoInterno(sb, `⚠️ Stock bajo de *${p.nombre}*: quedan ${p.stock} unidades.`, p.id);
+          }
+        }
+
         return json(200, { ok: true });
       }
 
@@ -345,9 +421,39 @@ export default async (req, context) => {
       if (nombre === "pedidos") {
         if (!permisosRol.includes("pedidos")) return error(403, "Tu rol no tiene permiso de pedidos.");
         if (!Array.isArray(body)) return error(400, "Se esperaba un arreglo de pedidos.");
+
+        // Traemos el estado ANTERIOR de estos pedidos para detectar qué cambió.
+        const codigos = body.map((o) => o.codigo).filter(Boolean);
+        const { data: previos } = await sb.from("pedidos").select("codigo, pago_estado, estado_index").in("codigo", codigos);
+        const previoPorCodigo = new Map((previos || []).map((p) => [p.codigo, p]));
+
         const filas = body.map(filaDesdePedido);
         const { error: err } = await sb.from("pedidos").upsert(filas, { onConflict: "codigo" });
         if (err) throw err;
+
+        // Notificaciones: comparamos antes vs. después de cada pedido.
+        for (const o of body) {
+          const antes = previoPorCodigo.get(o.codigo);
+          if (!antes) continue; // pedido recién creado: ya se notificó en /pedido
+          const tel = o.cliente?.telefono;
+          const enTienda = o.entrega?.modo === "tienda";
+
+          if (antes.pago_estado !== "verificado" && o.pagoEstado === "verificado") {
+            if (tel) await enviarWhatsApp(sb, tel, `✅ Verificamos el pago de tu pedido *${o.codigo}*. ¡Ya lo estamos preparando!`, o.codigo);
+          }
+          if (antes.pago_estado !== "rechazado" && o.pagoEstado === "rechazado") {
+            if (tel) await enviarWhatsApp(sb, tel, `⚠️ No pudimos verificar el pago de tu pedido *${o.codigo}*${o.motivoRechazo ? ": " + o.motivoRechazo : ""}. Por favor contáctanos.`, o.codigo);
+            await notificarGrupoInterno(sb, `⚠️ Pago rechazado — pedido *${o.codigo}*`, o.codigo);
+          }
+          if (typeof o.estadoIndex === "number" && antes.estado_index !== o.estadoIndex && tel) {
+            const etiquetas = enTienda
+              ? { 3: "🚚 Tu equipo va en camino a la tienda que elegiste.", 4: "📦 ¡Ya puedes pasar a retirar tu pedido!", 5: "✅ Retiraste tu pedido. ¡Gracias por comprar en Alfa!" }
+              : { 3: "🚚 Despachamos tu pedido, ya va en camino.", 4: "📍 El repartidor tiene tu paquete y te lo entrega hoy.", 5: "✅ Tu pedido fue entregado. ¡Gracias por comprar en Alfa!" };
+            const msg = etiquetas[o.estadoIndex];
+            if (msg) await enviarWhatsApp(sb, tel, `${msg}\nPedido *${o.codigo}*.`, o.codigo);
+          }
+        }
+
         return json(200, { ok: true });
       }
 
