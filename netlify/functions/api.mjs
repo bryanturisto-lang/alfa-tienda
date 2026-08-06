@@ -32,7 +32,7 @@ const PERMISOS = {
 function json(status, data) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", "cache-control": "no-store, must-revalidate" },
   });
 }
 function error(status, msg) {
