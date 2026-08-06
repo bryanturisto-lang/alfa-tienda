@@ -167,9 +167,40 @@
       <td class="acciones">
         <button class="tbtn" type="button" onclick="verPedido('${o.codigo}')" title="Ver detalle">${A.icon("eye")}</button>
         <a class="tbtn" href="../seguimiento.html?codigo=${o.codigo}" target="_blank" rel="noopener" title="Ver como el cliente">${A.icon("pin")}</a>
+        ${A.sesion.actual() && A.sesion.actual().rol === "admin"
+          ? `<button class="tbtn" type="button" onclick="eliminarPedido('${o.codigo}')" title="Eliminar pedido" style="color:var(--red-600)">${A.icon("trash")}</button>`
+          : ""}
       </td>
     </tr>`;
   }
+
+  /* ==================== Eliminar (doble confirmación) ==================== */
+  window.eliminarPedido = function (codigo) {
+    ADM.confirmar(
+      "¿Eliminar este pedido?",
+      `Vas a eliminar el pedido <strong>${A.escape(codigo)}</strong> de forma permanente. Esta acción no se puede deshacer.`,
+      () => {
+        // Segunda confirmación: hay que estar muy seguro antes de borrar algo irreversible.
+        ADM.confirmar(
+          "Confirma otra vez",
+          `Última confirmación: el pedido <strong>${A.escape(codigo)}</strong> y todo su historial se borrarán para siempre de la base de datos.`,
+          async () => {
+            try {
+              await A.api.eliminarPedido(codigo);
+              A.toast("Pedido eliminado.");
+              location.reload();
+            } catch (e) {
+              A.toast(e.message || "No se pudo eliminar el pedido.", "alert");
+            }
+          },
+          "Sí, eliminar definitivamente",
+          true
+        );
+      },
+      "Continuar",
+      true
+    );
+  };
 
   /* ==================== Detalle ==================== */
   window.verPedido = function (codigo) {
