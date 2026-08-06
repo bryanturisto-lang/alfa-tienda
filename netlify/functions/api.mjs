@@ -381,6 +381,26 @@ export default async (req, context) => {
       return json(200, pedidoDesdeFila(data));
     }
 
+    // -------- /pedido/:codigo (eliminar) — solo administradores --------
+    if (partes[0] === "pedido" && partes[1] && metodo === "DELETE") {
+      const sesion = sesionDesdePeticion(req);
+      if (!sesion) return error(401, "Sesión inválida o vencida.");
+      if (sesion.rol !== "admin") return error(403, "Solo un administrador puede eliminar pedidos.");
+      const codigo = decodeURIComponent(partes[1]);
+      const { data: existente } = await sb.from("pedidos").select("codigo").eq("codigo", codigo).maybeSingle();
+      if (!existente) return error(404, "No encontramos ese pedido.");
+      const { error: err } = await sb.from("pedidos").delete().eq("codigo", codigo);
+      if (err) throw err;
+      await sb.from("bitacora").insert({
+        tipo: "pedido-eliminado",
+        mensaje: `${sesion.nombre} eliminó el pedido ${codigo}`,
+        referencia: codigo,
+        usuario: sesion.usuario,
+        rol: sesion.rol,
+      });
+      return json(200, { ok: true });
+    }
+
     // -------- /coleccion/:nombre (guarda desde el panel) --------
     if (partes[0] === "coleccion" && partes[1] && metodo === "PUT") {
       const sesion = sesionDesdePeticion(req);
