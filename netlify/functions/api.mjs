@@ -178,7 +178,7 @@ async function cargarPedidos(sb) {
 async function cargarBitacora(sb) {
   const { data, error: err } = await sb.from("bitacora").select("*").order("fecha", { ascending: false }).limit(500);
   if (err) throw err;
-  return (data || []).map((f) => ({ tipo: f.tipo, mensaje: f.mensaje, referencia: f.referencia, usuario: f.usuario, fecha: f.fecha }));
+  return (data || []).map((f) => ({ id: f.id, fecha: f.fecha, usuario: f.usuario, rol: f.rol, accion: f.tipo, detalle: f.mensaje, ref: f.referencia }));
 }
 
 // --------------------- handler principal ---------------------
@@ -302,6 +302,7 @@ export default async (req, context) => {
         mensaje: `Pedido ${codigo} por $${body.totales?.total ?? "?"}`,
         referencia: codigo,
         usuario: null,
+        rol: null,
       });
 
       return json(201, pedidoDesdeFila(fila));
@@ -351,10 +352,10 @@ export default async (req, context) => {
       }
 
       if (nombre === "bitacora") {
-        // Append-only: solo insertamos entradas nuevas (las que el cliente aún no había visto se identifican por no tener id).
+        // Append-only: solo insertamos entradas nuevas (las que el cliente creó localmente no tienen id todavía).
         if (!Array.isArray(body)) return error(400, "Se esperaba un arreglo.");
         const nuevas = body.filter((b) => !b.id).map((b) => ({
-          tipo: b.tipo, mensaje: b.mensaje, referencia: b.referencia || null, usuario: sesion.usuario, fecha: b.fecha || new Date().toISOString(),
+          tipo: b.accion, mensaje: b.detalle, referencia: b.ref || null, usuario: sesion.usuario, rol: sesion.rol, fecha: b.fecha || new Date().toISOString(),
         }));
         if (nuevas.length) {
           const { error: err } = await sb.from("bitacora").insert(nuevas);
