@@ -94,14 +94,14 @@
 
   A.fmtFecha = (iso) => {
     const d = new Date(iso);
-    return d.toLocaleDateString("es-VE", { day: "2-digit", month: "short", year: "numeric" });
+    return d.toLocaleDateString("es-VE", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Caracas" });
   };
   A.fmtFechaHora = (iso) => {
     const d = new Date(iso);
     return (
-      d.toLocaleDateString("es-VE", { day: "2-digit", month: "short", year: "numeric" }) +
+      d.toLocaleDateString("es-VE", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Caracas" }) +
       " · " +
-      d.toLocaleTimeString("es-VE", { hour: "2-digit", minute: "2-digit", hour12: false })
+      d.toLocaleTimeString("es-VE", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "America/Caracas" })
     );
   };
 
@@ -1283,7 +1283,7 @@
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") A.closeCart();
     });
-    A.autoRefrescar(page);
+    A.autoRefrescar();
     return A.modoServidor;
   };
 
@@ -1291,16 +1291,16 @@
   A.initAdmin = async function () {
     await A.cargarDatos();
     Orders.seed();
-    A.autoRefrescar("admin");
+    A.autoRefrescar();
     return A.modoServidor;
   };
 
   /* ==================== Auto-refresco ====================
      Cada 5 minutos recarga la página para traer datos frescos del
-     servidor (precios, stock, estado de pedidos). No interrumpe si
-     el usuario está escribiendo en un campo o llenando el checkout. */
-  A.autoRefrescar = function (page) {
-    if (page === "checkout") return; // nunca en medio de una compra
+     servidor (precios, stock, estado de pedidos), en toda la tienda,
+     el panel y el checkout. Se pausa solo si el usuario está
+     escribiendo en un campo o hay un modal abierto en ese momento. */
+  A.autoRefrescar = function () {
     const CINCO_MIN = 5 * 60 * 1000;
     setInterval(() => {
       const activo = document.activeElement;
