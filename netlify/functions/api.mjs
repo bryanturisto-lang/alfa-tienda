@@ -51,17 +51,22 @@ async function enviarWhatsApp(sb, numeroDestino, texto, refPedido) {
   const numero = numeroDestino.includes("@g.us") ? numeroDestino : normalizarNumeroVE(numeroDestino);
   if (!numero) return;
   try {
+    const controlador = new AbortController();
+    const corte = setTimeout(() => controlador.abort(), 3000);
     const resp = await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INSTANCIA}`, {
       method: "POST",
       headers: { "content-type": "application/json", apikey: EVOLUTION_APIKEY },
       body: JSON.stringify({ number: numero, text: texto }),
+      signal: controlador.signal,
     });
+    clearTimeout(corte);
     if (!resp.ok) {
       const detalle = await resp.text().catch(() => "");
       if (sb) await sb.from("bitacora").insert({ tipo: "whatsapp-error", mensaje: `Fallo al enviar a ${numero}: ${resp.status} ${detalle}`.slice(0, 500), referencia: refPedido || null });
     }
   } catch (e) {
-    if (sb) await sb.from("bitacora").insert({ tipo: "whatsapp-error", mensaje: `Excepción al enviar a ${numero}: ${e.message}`.slice(0, 500), referencia: refPedido || null });
+    const motivo = e.name === "AbortError" ? "tiempo de espera agotado (5s)" : e.message;
+    if (sb) await sb.from("bitacora").insert({ tipo: "whatsapp-error", mensaje: `Excepción al enviar a ${numero}: ${motivo}`.slice(0, 500), referencia: refPedido || null });
   }
 }
 
