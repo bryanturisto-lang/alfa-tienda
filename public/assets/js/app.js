@@ -1283,6 +1283,7 @@
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") A.closeCart();
     });
+    A.autoRefrescar(page);
     return A.modoServidor;
   };
 
@@ -1290,6 +1291,23 @@
   A.initAdmin = async function () {
     await A.cargarDatos();
     Orders.seed();
+    A.autoRefrescar("admin");
     return A.modoServidor;
+  };
+
+  /* ==================== Auto-refresco ====================
+     Cada 5 minutos recarga la página para traer datos frescos del
+     servidor (precios, stock, estado de pedidos). No interrumpe si
+     el usuario está escribiendo en un campo o llenando el checkout. */
+  A.autoRefrescar = function (page) {
+    if (page === "checkout") return; // nunca en medio de una compra
+    const CINCO_MIN = 5 * 60 * 1000;
+    setInterval(() => {
+      const activo = document.activeElement;
+      const escribiendo = activo && (activo.tagName === "INPUT" || activo.tagName === "TEXTAREA" || activo.tagName === "SELECT");
+      const hayModalAbierto = document.querySelector(".modal-overlay, .modal.is-open, [aria-modal='true']");
+      if (escribiendo || hayModalAbierto) return; // reintenta en el próximo ciclo
+      location.reload();
+    }, CINCO_MIN);
   };
 })();
