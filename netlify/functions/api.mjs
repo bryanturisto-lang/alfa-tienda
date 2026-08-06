@@ -259,6 +259,9 @@ export default async (req, context) => {
       return json(200, {
         ok: true,
         secretoPorDefecto: SECRETO_POR_DEFECTO,
+        evolutionConfigurado: evolutionListo(),
+        evolutionUrl: EVOLUTION_URL || null,
+        evolutionGrupoInternoConfigurado: !!EVOLUTION_GRUPO_INTERNO,
       });
     } catch (e) {
       return json(200, { ok: false, almacenamiento: false, motivo: e.message });
