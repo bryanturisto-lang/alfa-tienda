@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es-VE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Producto — Alfa</title>
+<meta name="description" content="Ficha técnica, características y opiniones de las laptops Alfa.">
+<link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<div class="wrap">
+  <nav class="breadcrumb" id="breadcrumb" aria-label="Ruta de navegación"></nav>
+</div>
+
+<main class="wrap" style="padding-bottom:20px">
+  <div class="pdp" id="pdp"></div>
+</main>
+
+<section class="section section--tight">
+  <div class="wrap">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div id="tabPanels"></div>
+  </div>
+</section>
+
+<section class="section section--tint">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">También te puede servir</span>
+      <h2>Modelos relacionados</h2>
+    </div>
+    <div class="grid-products" id="relacionados"></div>
+  </div>
+</section>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(async function () {
+  const A = window.ALFA;
+  A.basePath = "";
+  await A.init("producto");
+
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id") || "zenith-14";
+  const p = A.getProduct(id);
+
+  if (!p) {
+    document.getElementById("pdp").innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        ${A.icon("alert", "", 46)}
+        <h2 style="margin-bottom:8px">No encontramos ese producto</h2>
+        <p class="small">El modelo <strong>${A.escape(id)}</strong> no está en el catálogo.</p>
+        <a class="btn btn-primary" style="margin-top:18px" href="index.html#catalogo">Ver todas las laptops</a>
+      </div>`;
+    document.getElementById("breadcrumb").innerHTML =
+      '<a href="index.html">Inicio</a><span>/</span><span>No encontrado</span>';
+    return;
+  }
+
+  document.title = p.nombre + " — Alfa";
+  document.querySelector('meta[name="description"]').setAttribute("content", p.resumen);
+
+  const dsc = p.precioAnterior ? Math.round((1 - p.precio / p.precioAnterior) * 100) : 0;
+  const ahorro = p.precioAnterior ? A.round2(p.precioAnterior - p.precio) : 0;
+
+  /* ---------------- Migas de pan ---------------- */
+  document.getElementById("breadcrumb").innerHTML = `
+    <a href="index.html">Inicio</a><span>/</span>
+    <a href="index.html?filtro=${p.categoria}#catalogo">${p.categoriaLabel}</a><span>/</span>
+    <span class="muted">${A.escape(p.nombre)}</span>`;
+
+  /* ---------------- Ficha principal ---------------- */
+  const stockCls = p.stock > 10 ? "dot-green" : p.stock > 3 ? "dot-amber" : "dot-red";
+  const stockTxt = p.stock > 10
+    ? `${p.stock} unidades disponibles`
+    : p.stock > 0 ? `Solo quedan ${p.stock} unidades` : "Agotado por ahora";
+
+  document.getElementById("pdp").innerHTML = `
+  <div class="gallery">
+    <div class="gallery-main">
+      <img id="galleryMain" src="${A.img(p.imagenes[0])}" alt="${A.escape(p.nombre)}">
+      ${dsc > 0 ? `<span class="badge badge-solid" style="position:absolute;top:18px;left:18px">−${dsc}% · ahorras ${A.fmtUSD(ahorro)}</span>` : ""}
+    </div>
+    <div class="gallery-thumbs" id="galleryThumbs">
+      ${p.imagenes.map((im, i) => `
+        <button class="gallery-thumb${i === 0 ? " is-active" : ""}" type="button" data-src="${A.img(im)}" aria-label="Vista ${i + 1}">
+          <img src="${A.img(im)}" alt="">
+        </button>`).join("")}
+    </div>
+    <div class="notice notice-blue" style="margin-top:16px">
+      ${A.icon("info")}
+      <span>Las imágenes son ilustrativas. El equipo se entrega sellado, con su cargador original y manual en español.</span>
+    </div>
+  </div>
+
+  <div class="pdp-info stack-16">
+    <div>
+      <span class="card-brand">${A.escape(p.linea)} · ${A.escape(p.categoriaLabel)}</span>
+      <h1 style="margin-top:6px">${A.escape(p.nombre)}</h1>
+      <div class="row wrap-row" style="margin-top:10px">
+        ${A.stars(p.rating)}
+        <span class="small muted">${p.rating.toFixed(1)} · ${p.reviews} opiniones</span>
+        <span style="color:var(--gray-300)">|</span>
+        ${p.etiquetas.map(t => `<span class="badge">${A.escape(t)}</span>`).join("")}
+      </div>
+    </div>
+
+    <p class="lead">${A.escape(p.resumen)}</p>
+
+    <div class="pdp-price">
+      <span class="price-now">${A.fmtUSD(p.precio)}</span>
+      ${p.precioAnterior ? `<span class="price-old" style="font-size:1rem">${A.fmtUSD(p.precioAnterior)}</span>` : ""}
+      <span class="badge badge-green">5 % menos pagando en Bs</span>
+    </div>
+    <div class="small muted" style="margin-top:-8px">
+      ${A.fmtBs(p.precio)} a la tasa de hoy · IVA no incluido
+    </div>
+
+    <div class="stock-line" style="font-size:.86rem">
+      <span class="dot ${stockCls}"></span>
+      <span class="muted">${stockTxt}</span>
+    </div>
+
+    <div class="field" style="max-width:280px">
+      <label for="colorSel">Color</label>
+      <select class="select" id="colorSel">
+        ${p.coloresDisponibles.map(c => `<option${c === p.color ? " selected" : ""}>${A.escape(c)}</option>`).join("")}
+      </select>
+    </div>
+
+    <div class="pdp-buy">
+      <div class="qty" style="height:46px">
+        <button type="button" id="qMinus" style="width:38px;height:44px" aria-label="Restar">−</button>
+        <span id="qVal" style="min-width:38px;font-size:.95rem">1</span>
+        <button type="button" id="qPlus" style="width:38px;height:44px" aria-label="Sumar">+</button>
+      </div>
+      <button class="btn btn-primary btn-lg grow" id="btnAdd" type="button" ${p.stock === 0 ? "disabled" : ""}>
+        ${A.icon("cart")} Agregar al carrito
+      </button>
+      <button class="icon-btn" id="btnFav" type="button" style="border:1.5px solid var(--gray-200);width:46px;height:46px" aria-label="Favorito">
+        ${A.icon("heart")}
+      </button>
+    </div>
+
+    <button class="btn btn-dark btn-lg btn-block" id="btnBuyNow" type="button" ${p.stock === 0 ? "disabled" : ""}>
+      ${A.icon("bolt")} Comprar ahora
+    </button>
+
+    <div class="info-grid" style="margin-top:6px">
+      <div class="info-cell">
+        <dt>Entrega</dt>
+        <dd style="font-size:.86rem;font-weight:500">Delivery de 1 a 5 días hábiles o retiro en tienda sin costo</dd>
+      </div>
+      <div class="info-cell">
+        <dt>Pago</dt>
+        <dd style="font-size:.86rem;font-weight:500">Pago móvil, transferencia, Zelle o efectivo al retirar</dd>
+      </div>
+      <div class="info-cell">
+        <dt>Garantía</dt>
+        <dd style="font-size:.86rem;font-weight:500">${A.escape(p.specs["Garantía"])}</dd>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:12px">Lo que la hace distinta</h3>
+      <ul class="feature-list">
+        ${p.destacados.map(d => `<li>${A.icon("check", "no-shrink")}<span>${A.escape(d)}</span></li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="row wrap-row" style="gap:8px;margin-top:4px">
+      ${[
+        ["chip", p.specs.Procesador.split("·")[0].trim()],
+        ["monitor", p.specs.Pantalla.split("·")[0].trim().replace(/"/g, "″")],
+        ["box", p.specs.Almacenamiento.split("(")[0].trim()],
+        ["battery", p.specs["Batería"]],
+        ["weight", p.specs.Peso],
+      ].map(([ic, t]) => `<span class="spec-pill">${A.icon(ic, "icon-16")} ${A.escape(t)}</span>`).join("")}
+    </div>
+  </div>`;
+
+  /* ---------------- Galería ---------------- */
+  const main = document.getElementById("galleryMain");
+  document.getElementById("galleryThumbs").addEventListener("click", (e) => {
+    const b = e.target.closest(".gallery-thumb");
+    if (!b) return;
+    main.style.opacity = "0";
+    setTimeout(() => { main.src = b.dataset.src; main.style.opacity = "1"; }, 130);
+    document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.toggle("is-active", t === b));
+  });
+
+  /* ---------------- Cantidad y compra ---------------- */
+  let qty = 1;
+  const qVal = document.getElementById("qVal");
+  const setQ = (n) => { qty = Math.max(1, Math.min(n, Math.max(p.stock, 1))); qVal.textContent = qty; };
+  document.getElementById("qMinus").onclick = () => setQ(qty - 1);
+  document.getElementById("qPlus").onclick = () => {
+    if (qty >= p.stock) return A.toast(`Solo hay ${p.stock} unidades disponibles`, "alert");
+    setQ(qty + 1);
+  };
+
+  document.getElementById("btnAdd").onclick = () => { A.cart.add(p.id, qty); A.openCart(); };
+  document.getElementById("btnBuyNow").onclick = () => { A.cart.add(p.id, qty); location.href = "checkout.html"; };
+
+  const fav = document.getElementById("btnFav");
+  if (A.favs.has(p.id)) fav.style.color = "var(--red-600)";
+  fav.onclick = () => {
+    const on = A.favs.toggle(p.id);
+    fav.style.color = on ? "var(--red-600)" : "";
+    A.toast(on ? "Guardado en favoritos" : "Quitado de favoritos", "heart");
+  };
+
+  /* ---------------- Pestañas ---------------- */
+  const TABS = [
+    { id: "desc", label: "Descripción" },
+    { id: "specs", label: "Ficha técnica" },
+    { id: "envio", label: "Envío y garantía" },
+    { id: "op", label: `Opiniones (${p.opiniones.length})` },
+  ];
+
+  document.getElementById("tabs").innerHTML = TABS
+    .map((t, i) => `<button class="tab${i === 0 ? " is-active" : ""}" data-tab="${t.id}" type="button" role="tab">${t.label}</button>`)
+    .join("");
+
+  const prom = (p.opiniones.reduce((s, o) => s + o.estrellas, 0) / p.opiniones.length).toFixed(1);
+
+  document.getElementById("tabPanels").innerHTML = `
+    <div class="tab-panel is-active" data-panel="desc">
+      <div style="max-width:74ch" class="stack-16">
+        <p style="font-size:1rem;color:var(--ink-soft);line-height:1.75">${A.escape(p.descripcion)}</p>
+        <div class="grid-2" style="gap:22px">
+          <div class="panel" style="padding:22px">
+            <h3 style="font-size:.98rem;margin-bottom:12px">En la caja</h3>
+            <ul class="feature-list">
+              <li>${A.icon("check", "no-shrink")}<span>${A.escape(p.nombre)} en color ${A.escape(p.color)}</span></li>
+              <li>${A.icon("check", "no-shrink")}<span>Cargador original y cable</span></li>
+              <li>${A.icon("check", "no-shrink")}<span>Manual en español y certificado de garantía</span></li>
+              ${p.id === "flex-360" ? `<li>${A.icon("check", "no-shrink")}<span>Alfa Pen con punta de repuesto</span></li>` : ""}
+              ${p.categoria === "gaming" ? `<li>${A.icon("check", "no-shrink")}<span>Adaptador de 230 W y correa organizadora</span></li>` : ""}
+            </ul>
+          </div>
+          <div class="panel" style="padding:22px">
+            <h3 style="font-size:.98rem;margin-bottom:12px">Servicios incluidos</h3>
+            <ul class="feature-list">
+              <li>${A.icon("check", "no-shrink")}<span>Configuración inicial gratuita en tienda</span></li>
+              <li>${A.icon("check", "no-shrink")}<span>Migración de datos desde tu equipo anterior</span></li>
+              <li>${A.icon("check", "no-shrink")}<span>Soporte por WhatsApp los primeros 90 días</span></li>
+              <li>${A.icon("check", "no-shrink")}<span>Revisión técnica sin costo al año</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="specs">
+      <dl class="specs-table" style="max-width:820px">
+        ${Object.entries(p.specs).map(([k, v]) =>
+          `<div class="specs-row"><dt>${A.escape(k)}</dt><dd>${A.escape(v)}</dd></div>`).join("")}
+        <div class="specs-row"><dt>Color de esta unidad</dt><dd>${A.escape(p.color)}</dd></div>
+        <div class="specs-row"><dt>Código de modelo</dt><dd class="mono">${p.id.toUpperCase()}</dd></div>
+      </dl>
+    </div>
+
+    <div class="tab-panel" data-panel="envio">
+      <div class="grid-2" style="gap:22px;align-items:start;max-width:900px">
+        <div class="panel" style="padding:22px">
+          <h3 style="font-size:.98rem;margin-bottom:14px">Zonas y tiempos de delivery</h3>
+          <dl class="specs-table">
+            ${A.config.zonas.map(z => `<div class="specs-row" style="grid-template-columns:1fr auto">
+              <dt style="color:var(--gray-700)">${z.nombre}</dt>
+              <dd style="text-align:right">${A.fmtUSD(z.costo)} · ${z.dias} ${z.dias === 1 ? "día" : "días"}</dd>
+            </div>`).join("")}
+          </dl>
+          <div class="notice notice-green" style="margin-top:14px">
+            ${A.icon("truck")}<span>Delivery gratis en pedidos sobre ${A.fmtUSD(A.config.freeShippingOver)}.</span>
+          </div>
+        </div>
+        <div class="panel" style="padding:22px">
+          <h3 style="font-size:.98rem;margin-bottom:14px">Garantía y devoluciones</h3>
+          <ul class="feature-list">
+            <li>${A.icon("shield", "no-shrink")}<span><strong>${A.escape(p.specs["Garantía"])}</strong> contra defectos de fábrica.</span></li>
+            <li>${A.icon("refresh", "no-shrink")}<span>7 días para cambio o devolución si el equipo llega con falla o no corresponde con lo pedido.</span></li>
+            <li>${A.icon("headset", "no-shrink")}<span>Servicio técnico propio en Caracas; en el interior recogemos el equipo por courier sin costo.</span></li>
+            <li>${A.icon("package", "no-shrink")}<span>Conserva la caja original durante los primeros 30 días.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="op">
+      <div style="max-width:760px">
+        <div class="row" style="gap:20px;padding-bottom:18px;border-bottom:1px solid var(--line);flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-size:2.4rem;font-weight:800;color:var(--brand-deep);line-height:1">${prom}</div>
+            ${A.stars(prom)}
+            <div class="tiny muted" style="margin-top:4px">${p.reviews} opiniones verificadas</div>
+          </div>
+          <div class="grow stack-4" style="min-width:220px">
+            ${[5, 4, 3, 2, 1].map(n => {
+              const c = p.opiniones.filter(o => o.estrellas === n).length;
+              const pct = Math.round((c / p.opiniones.length) * 100);
+              return `<div class="row" style="gap:9px">
+                <span class="tiny muted" style="width:14px">${n}★</span>
+                <span style="flex:1;height:6px;background:var(--gray-100);border-radius:99px;overflow:hidden">
+                  <span style="display:block;height:100%;width:${pct}%;background:var(--brand)"></span>
+                </span>
+                <span class="tiny muted" style="width:32px;text-align:right">${pct}%</span>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>
+        ${p.opiniones.map(o => `
+          <div class="review">
+            <div class="row" style="align-items:flex-start;gap:13px">
+              <span class="avatar">${A.escape(o.autor.slice(0, 1))}</span>
+              <div class="grow">
+                <div class="row-between" style="align-items:flex-start">
+                  <div>
+                    <strong style="font-size:.92rem;color:var(--brand-deep)">${A.escape(o.autor)}</strong>
+                    <div class="row" style="gap:8px;margin-top:2px">
+                      ${A.stars(o.estrellas)}
+                      <span class="badge badge-green">Compra verificada</span>
+                    </div>
+                  </div>
+                  <span class="tiny muted">${A.escape(o.fecha)}</span>
+                </div>
+                <p class="small" style="margin-top:9px;color:var(--ink-soft)">${A.escape(o.texto)}</p>
+              </div>
+            </div>
+          </div>`).join("")}
+      </div>
+    </div>`;
+
+  document.getElementById("tabs").addEventListener("click", (e) => {
+    const b = e.target.closest(".tab");
+    if (!b) return;
+    document.querySelectorAll(".tab").forEach(t => t.classList.toggle("is-active", t === b));
+    document.querySelectorAll(".tab-panel").forEach(pn =>
+      pn.classList.toggle("is-active", pn.dataset.panel === b.dataset.tab));
+  });
+
+  /* ---------------- Relacionados ---------------- */
+  const rel = A.products
+    .filter(x => x.id !== p.id)
+    .sort((a, b) => {
+      const sa = (a.categoria === p.categoria ? 2 : 0) + (a.linea === p.linea ? 1 : 0) - Math.abs(a.precio - p.precio) / 5000;
+      const sb = (b.categoria === p.categoria ? 2 : 0) + (b.linea === p.linea ? 1 : 0) - Math.abs(b.precio - p.precio) / 5000;
+      return sb - sa;
+    })
+    .slice(0, 4);
+  document.getElementById("relacionados").innerHTML = rel.map(A.cardHTML).join("");
+})();
+</script>
+</body>
+</html>

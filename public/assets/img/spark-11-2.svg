@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Laptop cerrada, vista superior">
+  <defs>
+    <linearGradient id="wall9" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffe08a"/><stop offset="100%" stop-color="#2b7cff"/>
+    </linearGradient>
+    <linearGradient id="lid9" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a9c8ec"/><stop offset="100%" stop-color="#82a7d4"/>
+    </linearGradient>
+    <linearGradient id="deck9" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bcd6f2"/><stop offset="100%" stop-color="#82a7d4"/>
+    </linearGradient>
+    <linearGradient id="gloss9" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity=".30"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity=".05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="shadow9" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a2540" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#0a2540" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rgb9" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff3d81"/><stop offset="35%" stop-color="#a98bff"/>
+      <stop offset="65%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#4dff9e"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="400.0" cy="471.79999999999995" rx="220" ry="22" fill="url(#shadow9)"/>
+  <rect x="170.4" y="138.2" width="459.2" height="311.6" rx="18.0" fill="url(#lid9)" stroke="#82a7d4" stroke-width="1.6"/>
+  <rect x="170.4" y="138.2" width="459.2" height="171.4" rx="18.0" fill="url(#gloss9)"/>
+  <path d="M 400.0 240.4 L 435.2 323.2 L 421.4 323.2 L 400.0 280.4 L 378.6 323.2 L 364.8 323.2 Z" fill="#5d84b3"/>
+  <rect x="385.3" y="297.5" width="29.5" height="6.7" rx="3" fill="#5d84b3"/>
+  <text x="400.0" y="359.3" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12.3" font-weight="700" letter-spacing="8" fill="#5d84b3" opacity=".85">ALFA</text>
+  <rect x="177.4" y="145.2" width="445.2" height="297.6" rx="13.9" fill="none" stroke="#ffffff" stroke-opacity=".14" stroke-width="1.2"/>
+  </svg>

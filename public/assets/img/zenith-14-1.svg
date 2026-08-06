@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Laptop abierta">
+  <defs>
+    <linearGradient id="wall0" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2b7cff"/><stop offset="100%" stop-color="#0a2540"/>
+    </linearGradient>
+    <linearGradient id="lid0" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dfe4ea"/><stop offset="100%" stop-color="#b6bec8"/>
+    </linearGradient>
+    <linearGradient id="deck0" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8ecf1"/><stop offset="100%" stop-color="#b6bec8"/>
+    </linearGradient>
+    <linearGradient id="gloss0" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity=".30"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity=".05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="shadow0" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a2540" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#0a2540" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rgb0" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff3d81"/><stop offset="35%" stop-color="#a98bff"/>
+      <stop offset="65%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#4dff9e"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="400.0" cy="458.2" rx="346" ry="26" fill="url(#shadow0)"/>
+  <rect x="155.6" y="92.0" width="488.8" height="310.2" rx="15.0" fill="url(#lid0)" stroke="#b6bec8" stroke-width="1.5"/>
+  <rect x="159.6" y="96.0" width="480.8" height="302.2" rx="12.2" fill="#0b0e12"/>
+    <rect x="169.70000000000002" y="106.1" width="460.59999999999997" height="272.6" rx="5" fill="url(#wall0)"/>
+  <rect x="169.70000000000002" y="106.1" width="460.59999999999997" height="272.6" rx="5" fill="url(#gloss0)"/>
+  <circle cx="400.0" cy="242.4" r="211.9" fill="none" stroke="#ffffff" stroke-opacity="0.10" stroke-width="1.6"/>
+  <circle cx="400.0" cy="242.4" r="156.6" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.6"/>
+  <circle cx="400.0" cy="242.4" r="101.3" fill="none" stroke="#ffffff" stroke-opacity="0.20" stroke-width="1.6"/>
+  <path d="M 400.0 160.6 L 458.9 301.3 L 436.0 301.3 L 400.0 227.7 L 364.0 301.3 L 341.1 301.3 Z" fill="#ffffff" fill-opacity=".92"/>
+  <rect x="375.5" y="257.1" width="49.1" height="10.6" rx="2" fill="#ffffff" fill-opacity=".92"/>
+  <rect x="169.70000000000002" y="106.1" width="460.59999999999997" height="20.4" fill="#000000" fill-opacity=".16"/>
+  <circle cx="183.7" cy="116.3" r="3" fill="#ffffff" fill-opacity=".55"/>
+  <circle cx="194.7" cy="116.3" r="3" fill="#ffffff" fill-opacity=".55"/>
+  <circle cx="205.7" cy="116.3" r="3" fill="#ffffff" fill-opacity=".55"/>
+  <rect x="303.3" y="340.5" width="193.5" height="23.2" rx="11.4" fill="#ffffff" fill-opacity=".18"/>
+  <circle cx="322.6" cy="352.1" r="5.7" fill="#ffffff" fill-opacity=".55"/>
+  <circle cx="361.3" cy="352.1" r="5.7" fill="#ffffff" fill-opacity=".55"/>
+  <circle cx="400.0" cy="352.1" r="5.7" fill="#ffffff" fill-opacity=".55"/>
+  <circle cx="438.7" cy="352.1" r="5.7" fill="#ffffff" fill-opacity=".55"/>
+  <circle cx="477.4" cy="352.1" r="5.7" fill="#ffffff" fill-opacity=".55"/>
+  <circle cx="400.0" cy="100.0" r="2.6" fill="#3a4048"/>
+  <circle cx="400.0" cy="100.0" r="1.1" fill="#2b7cff" opacity=".8"/>
+  <text x="400.0" y="396.6" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="10.3" font-weight="800" letter-spacing="3" fill="#9aa4b0">ALFA</text>
+  <path d="M 149.6 402.2 H 650.4 L 679.4 432.2 Q 679.4 441.2 669.4 441.2 H 130.6 Q 120.6 441.2 120.6 432.2 Z" fill="url(#deck0)" stroke="#b6bec8" stroke-width="1.5"/>
+  <path d="M 348.0 441.2 q 52 12 104 0" fill="none" stroke="#b6bec8" stroke-width="2" opacity=".6"/>
+  <rect x="132.6" y="406.2" width="534.8" height="3" rx="1.5" fill="#ffffff" opacity=".22"/>
+  </svg>

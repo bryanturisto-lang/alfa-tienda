@@ -1,0 +1,8 @@
+# Alfa — tienda de laptops
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /checkout.html
+Disallow: /api/
+
+Sitemap: /sitemap.xml

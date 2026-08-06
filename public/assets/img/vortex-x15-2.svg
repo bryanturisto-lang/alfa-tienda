@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Laptop cerrada, vista superior">
+  <defs>
+    <linearGradient id="wall2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00e5ff"/><stop offset="100%" stop-color="#5b16d8"/>
+    </linearGradient>
+    <linearGradient id="lid2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#262b33"/><stop offset="100%" stop-color="#14181e"/>
+    </linearGradient>
+    <linearGradient id="deck2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2e343d"/><stop offset="100%" stop-color="#14181e"/>
+    </linearGradient>
+    <linearGradient id="gloss2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity=".30"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity=".05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="shadow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a2540" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#0a2540" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rgb2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff3d81"/><stop offset="35%" stop-color="#a98bff"/>
+      <stop offset="65%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#4dff9e"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="400.0" cy="502.2" rx="263" ry="22" fill="url(#shadow2)"/>
+  <rect x="125.6" y="107.8" width="548.8" height="372.4" rx="21.6" fill="url(#lid2)" stroke="#14181e" stroke-width="1.6"/>
+  <rect x="125.6" y="107.8" width="548.8" height="204.8" rx="21.6" fill="url(#gloss2)"/>
+  <path d="M 400.0 231.2 L 442.1 330.1 L 425.6 330.1 L 400.0 278.9 L 374.4 330.1 L 357.9 330.1 Z" fill="#00d4ff"/>
+  <rect x="382.4" y="299.4" width="35.2" height="8.0" rx="3" fill="#00d4ff"/>
+  <text x="400.0" y="373.3" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14.7" font-weight="700" letter-spacing="8" fill="#00d4ff" opacity=".85">ALFA</text>
+  <rect x="132.6" y="114.8" width="534.8" height="358.4" rx="16.7" fill="none" stroke="#ffffff" stroke-opacity=".14" stroke-width="1.2"/>
+  <path d="M 165.6 137.8 l 90 0 l -22 26 l -90 0 z" fill="#00d4ff" opacity=".22"/>
+  <path d="M 634.4 450.2 l -90 0 l 22 -26 l 90 0 z" fill="#00d4ff" opacity=".22"/>
+  </svg>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es-VE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alfa — Laptops que rinden | Tienda online</title>
+<meta name="description" content="Alfa: laptops seleccionadas con garantía real, pago móvil, delivery a toda Venezuela y retiro en tienda. Ultrabooks, gaming, convertibles y equipos empresariales.">
+<link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="eyebrow">Nueva temporada 2026</span>
+      <h1>La laptop correcta,<br>sin <em>vueltas</em>.</h1>
+      <p class="hero-lead">Diez modelos escogidos con criterio: ultrabooks que no pesan, máquinas de juego que no se ahogan y equipos de trabajo que duran. Con garantía Alfa Care y soporte que contesta.</p>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="#catalogo">Ver el catálogo</a>
+        <a class="btn btn-ghost btn-lg" href="seguimiento.html" id="heroTrack">Rastrear mi pedido</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat"><strong>10</strong><span>modelos en stock</span></div>
+        <div class="hero-stat"><strong>3</strong><span>tiendas físicas</span></div>
+        <div class="hero-stat"><strong>24 h</strong><span>despacho en Caracas</span></div>
+        <div class="hero-stat"><strong>4,7★</strong><span>promedio de 2.039 opiniones</span></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-card">
+        <img src="assets/img/zenith-14-1.svg" alt="Alfa Zenith 14 abierta mostrando la pantalla">
+        <div class="row-between" style="margin-top:18px">
+          <div>
+            <span class="card-brand">Zenith · Ultrabook</span>
+            <h3 style="font-size:1.1rem;margin-top:2px">Alfa Zenith 14</h3>
+          </div>
+          <div style="text-align:right">
+            <span class="price-now">$849.00</span>
+            <div class="price-bs" id="heroBs"></div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-float hero-float--tl" id="floatA"></div>
+      <div class="hero-float hero-float--br" id="floatB"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BARRA DE VALOR ===================== -->
+<section class="valuebar">
+  <div class="wrap">
+    <div class="valuebar-grid" id="valueBar"></div>
+  </div>
+</section>
+
+<!-- ===================== CATÁLOGO ===================== -->
+<section class="section" id="catalogo">
+  <div class="wrap">
+    <div class="sec-head sec-head--row">
+      <div>
+        <span class="eyebrow">Catálogo completo</span>
+        <h2>Todas nuestras laptops</h2>
+        <p>Precios en dólares con su equivalente en bolívares a la tasa del día. Todas incluyen garantía Alfa Care y configuración inicial gratuita.</p>
+      </div>
+      <a class="link-arrow" href="#comparar">Comparar modelos <span aria-hidden="true">→</span></a>
+    </div>
+
+    <div class="toolbar">
+      <div class="filters" id="filtros"></div>
+      <div class="row" style="gap:10px">
+        <span class="small muted" id="contadorProductos"></span>
+        <select class="sort-select" id="ordenar" aria-label="Ordenar productos">
+          <option value="destacados">Destacados</option>
+          <option value="precio-asc">Precio: menor a mayor</option>
+          <option value="precio-desc">Precio: mayor a menor</option>
+          <option value="rating">Mejor valoradas</option>
+          <option value="nombre">Nombre A–Z</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-products" id="gridProductos"></div>
+  </div>
+</section>
+
+<!-- ===================== COMPARATIVA ===================== -->
+<section class="section section--tint" id="comparar">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Comparativa rápida</span>
+      <h2>¿Cuál te sirve a ti?</h2>
+      <p>Elige por lo que vas a hacer con ella, no por la ficha técnica.</p>
+    </div>
+    <div class="grid-products" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))" id="usoGrid"></div>
+  </div>
+</section>
+
+<!-- ===================== PAGO Y ENTREGA ===================== -->
+<section class="section">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Cómo comprar</span>
+      <h2>Pagas como te quede cómodo</h2>
+      <p>Aceptamos pago móvil, transferencia, Zelle y efectivo al retirar. Pagando en bolívares te descontamos un 5 %.</p>
+    </div>
+
+    <div class="grid-2" style="gap:22px;align-items:start">
+      <div class="panel">
+        <div class="panel-head"><h2 style="font-size:1.1rem">Formas de pago</h2></div>
+        <div class="stack-16" id="pagosLista"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2 style="font-size:1.1rem">Entrega</h2></div>
+        <div class="stack-16" id="entregaLista"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TIENDAS ===================== -->
+<section class="section section--blue">
+  <div class="wrap">
+    <div class="sec-head sec-head--row">
+      <div>
+        <span class="eyebrow">Puntos de retiro</span>
+        <h2>Prefieres pasar a buscarla</h2>
+        <p>Retiras sin costo, pruebas el equipo en el mostrador y te lo configuramos ahí mismo.</p>
+      </div>
+    </div>
+    <div class="grid-3" id="tiendasGrid"></div>
+  </div>
+</section>
+
+<!-- ===================== SEGUIMIENTO CTA ===================== -->
+<section class="section section--tight">
+  <div class="wrap">
+    <div class="panel" style="background:var(--brand-deep);border:none;display:flex;justify-content:space-between;align-items:center;gap:26px;flex-wrap:wrap;padding:34px">
+      <div style="max-width:52ch">
+        <h2 style="color:#fff;font-size:1.5rem">¿Ya compraste? Mira dónde va tu equipo</h2>
+        <p style="color:rgba(255,255,255,.72);margin-top:8px;font-size:.94rem">Ingresa tu número de pedido y verás el estado en tiempo real: pago verificado, preparación, despacho y entrega, con los datos del repartidor.</p>
+      </div>
+      <a class="btn btn-lg" style="background:#fff;color:var(--brand-deep)" href="seguimiento.html">Rastrear pedido</a>
+    </div>
+  </div>
+</section>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(async function () {
+  const A = window.ALFA;
+  A.basePath = "";
+  await A.init("inicio");
+
+  /* ---------- Bloques informativos del hero ---------- */
+  document.getElementById("heroBs").textContent = A.fmtBs(849);
+  document.getElementById("floatA").innerHTML =
+    A.icon("shield") + '<div><strong>Garantía Alfa Care</strong><span>Hasta 3 años de cobertura</span></div>';
+  document.getElementById("floatB").innerHTML =
+    A.icon("phone") + '<div><strong>Pago móvil</strong><span>Verificación en minutos</span></div>';
+
+  /* ---------- Barra de valor ---------- */
+  const valores = [
+    ["truck", "Delivery a todo el país", "Gratis en compras sobre " + A.fmtUSD(A.config.freeShippingOver)],
+    ["phone", "Pago móvil y transferencia", "5 % de descuento pagando en bolívares"],
+    ["store", "Retiro en tienda sin costo", "Caracas, Valencia y Maracaibo"],
+    ["shield", "Garantía real", "Servicio técnico propio en Venezuela"],
+  ];
+  document.getElementById("valueBar").innerHTML = valores
+    .map(([ic, t, s]) => `<div class="valuebar-item">${A.icon(ic)}<div><strong>${t}</strong><span>${s}</span></div></div>`)
+    .join("");
+
+  /* ---------- Catálogo con filtros, orden y búsqueda ---------- */
+  const grid = document.getElementById("gridProductos");
+  const contador = document.getElementById("contadorProductos");
+
+  const CATS = [
+    { id: "todos", label: "Todas" },
+    { id: "ultrabook", label: "Ultrabooks" },
+    { id: "gaming", label: "Gaming" },
+    { id: "convertible", label: "Convertibles" },
+    { id: "creador", label: "Creadores" },
+    { id: "empresa", label: "Empresarial" },
+    { id: "hogar", label: "Uso diario" },
+  ];
+
+  const estado = { cat: "todos", orden: "destacados", q: "" };
+
+  document.getElementById("filtros").innerHTML = CATS.map(
+    (c) => `<button class="chip${c.id === "todos" ? " is-active" : ""}" data-cat="${c.id}" type="button">${c.label}</button>`
+  ).join("");
+
+  document.getElementById("filtros").addEventListener("click", (e) => {
+    const b = e.target.closest(".chip");
+    if (!b) return;
+    estado.cat = b.dataset.cat;
+    document.querySelectorAll("#filtros .chip").forEach((c) => c.classList.toggle("is-active", c === b));
+    pintar();
+  });
+
+  document.getElementById("ordenar").addEventListener("change", (e) => {
+    estado.orden = e.target.value;
+    pintar();
+  });
+
+  A.catalogo = {
+    buscar(q) {
+      estado.q = q || "";
+      const inp = document.getElementById("globalSearchInput");
+      if (inp) inp.value = estado.q;
+      pintar();
+    },
+  };
+
+  function pintar() {
+    let lista = A.products.slice();
+
+    if (estado.cat !== "todos") lista = lista.filter((p) => p.categoria === estado.cat);
+
+    const q = estado.q.trim().toLowerCase();
+    if (q) {
+      lista = lista.filter((p) =>
+        (p.nombre + " " + p.linea + " " + p.categoriaLabel + " " + p.resumen + " " + Object.values(p.specs).join(" "))
+          .toLowerCase()
+          .includes(q)
+      );
+    }
+
+    const ord = {
+      "precio-asc": (a, b) => a.precio - b.precio,
+      "precio-desc": (a, b) => b.precio - a.precio,
+      rating: (a, b) => b.rating - a.rating || b.reviews - a.reviews,
+      nombre: (a, b) => a.nombre.localeCompare(b.nombre, "es"),
+      destacados: (a, b) => b.reviews * b.rating - a.reviews * a.rating,
+    }[estado.orden];
+    lista.sort(ord);
+
+    contador.textContent = lista.length + (lista.length === 1 ? " modelo" : " modelos");
+
+    grid.innerHTML = lista.length
+      ? lista.map(A.cardHTML).join("")
+      : `<div class="empty-state">${A.icon("search")}
+           <h4 style="color:var(--brand-deep);margin-bottom:6px">Sin resultados</h4>
+           <p class="small">No encontramos laptops para “${A.escape(estado.q)}”. Prueba con otra palabra o quita el filtro.</p>
+           <button class="btn btn-ghost btn-sm" style="margin-top:16px" type="button" onclick="ALFA.catalogo.buscar('')">Limpiar búsqueda</button>
+         </div>`;
+  }
+
+  /* Filtro / búsqueda desde la URL (?filtro=gaming o ?q=texto) */
+  const params = new URLSearchParams(location.search);
+  if (params.get("filtro")) {
+    const b = document.querySelector(`#filtros .chip[data-cat="${params.get("filtro")}"]`);
+    if (b) b.click();
+  }
+  if (params.get("q")) A.catalogo.buscar(params.get("q"));
+  else pintar();
+
+  /* ---------- Guía "¿cuál te sirve?" ---------- */
+  const usos = [
+    { ic: "bolt", t: "Para moverte todo el día", d: "Menos de 1,2 kg, batería larga y silencio.", ids: ["nova-air-13", "zenith-14"] },
+    { ic: "monitor", t: "Para jugar en serio", d: "GPU dedicada, pantalla rápida y refrigeración de verdad.", ids: ["vortex-x15", "vortex-x17-titan"] },
+    { ic: "sparkle", t: "Para crear y editar", d: "Color calibrado, mucha RAM y almacenamiento veloz.", ids: ["studio-pro-16", "zenith-16-pro"] },
+    { ic: "lock", t: "Para la empresa o el estudio", d: "Seguridad, resistencia y precio sensato.", ids: ["edge-14-business", "core-15", "spark-11"] },
+  ];
+  document.getElementById("usoGrid").innerHTML = usos
+    .map(
+      (u) => `
+    <div class="card" style="padding:22px">
+      <div style="width:42px;height:42px;border-radius:12px;background:var(--blue-50);color:var(--brand);display:grid;place-items:center;margin-bottom:14px">${A.icon(u.ic)}</div>
+      <h3 style="font-size:1.02rem">${u.t}</h3>
+      <p class="small muted" style="margin-top:6px">${u.d}</p>
+      <div class="stack-8" style="margin-top:14px">
+        ${u.ids
+          .map((id) => {
+            const p = A.getProduct(id);
+            return `<a class="row" style="gap:10px" href="producto.html?id=${id}">
+              <span style="width:44px;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--gray-50);display:grid;place-items:center;padding:3px;flex-shrink:0">
+                <img src="${A.img(p.imagenes[0])}" alt="" style="width:100%">
+              </span>
+              <span class="grow"><strong style="font-size:.86rem;color:var(--brand-deep);display:block">${p.nombre}</strong>
+              <span class="tiny muted">${A.fmtUSD(p.precio)}</span></span>
+            </a>`;
+          })
+          .join("")}
+      </div>
+    </div>`
+    )
+    .join("");
+
+  /* ---------- Métodos de pago y entrega ---------- */
+  const pagos = [
+    ["phone", "Pago móvil", "Banco, cédula/RIF y teléfono de Alfa en pantalla. Cargas la referencia y verificamos en minutos. 5 % de descuento."],
+    ["card", "Transferencia bancaria", "A nuestra cuenta corriente en Banco de Venezuela. También con 5 % de descuento."],
+    ["mail", "Zelle", "Para pagos en dólares desde el exterior o cuentas en EE. UU."],
+    ["store", "Efectivo al retirar", "Pagas en la tienda cuando pasas a buscar el equipo, en dólares o bolívares."],
+  ];
+  document.getElementById("pagosLista").innerHTML = pagos
+    .map(
+      ([ic, t, d]) => `<div class="row" style="align-items:flex-start;gap:13px">
+        <span style="color:var(--brand);flex-shrink:0;margin-top:2px">${A.icon(ic)}</span>
+        <div><strong style="font-size:.94rem;color:var(--brand-deep);display:block">${t}</strong>
+        <span class="small muted">${d}</span></div></div>`
+    )
+    .join("");
+
+  const entregas = [
+    ["truck", "Delivery a domicilio", "Seis zonas cubiertas en todo el país, de 1 a 5 días hábiles. Gratis a partir de " + A.fmtUSD(A.config.freeShippingOver) + "."],
+    ["store", "Retiro en tienda", "Sin costo en Caracas, Valencia o Maracaibo. Listo en 24 a 48 horas."],
+    ["pin", "Seguimiento en línea", "Con tu número de pedido ves cada etapa y los datos del repartidor."],
+    ["shield", "Empaque protegido", "Doble caja con espuma y precinto de seguridad numerado."],
+  ];
+  document.getElementById("entregaLista").innerHTML = entregas
+    .map(
+      ([ic, t, d]) => `<div class="row" style="align-items:flex-start;gap:13px">
+        <span style="color:var(--brand);flex-shrink:0;margin-top:2px">${A.icon(ic)}</span>
+        <div><strong style="font-size:.94rem;color:var(--brand-deep);display:block">${t}</strong>
+        <span class="small muted">${d}</span></div></div>`
+    )
+    .join("");
+
+  /* ---------- Tiendas ---------- */
+  document.getElementById("tiendasGrid").innerHTML = A.config.tiendas
+    .map(
+      (t) => `<div class="card" style="padding:22px">
+      <span style="color:var(--brand)">${A.icon("store")}</span>
+      <h3 style="font-size:1rem;margin-top:10px">${t.nombre}</h3>
+      <p class="small muted" style="margin-top:6px">${t.direccion}</p>
+      <hr class="divider" style="margin:14px 0">
+      <div class="stack-4 small">
+        <span class="row" style="gap:7px">${A.icon("calendar")} ${t.horario}</span>
+        <span class="row" style="gap:7px">${A.icon("phone")} ${t.telefono}</span>
+      </div>
+    </div>`
+    )
+    .join("");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es-VE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pedidos — Alfa interno</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div id="adm-page" class="hidden">
+  <div class="adm-tools">
+    <div class="adm-search">
+      <span id="icBuscar"></span>
+      <input id="buscar" type="search" placeholder="Buscar por código, cliente, cédula o modelo…">
+    </div>
+    <div class="seg" id="filtroEstado"></div>
+    <select class="sort-select" id="filtroModo">
+      <option value="todos">Toda la entrega</option>
+      <option value="delivery">Solo delivery</option>
+      <option value="tienda">Solo retiro en tienda</option>
+    </select>
+    <select class="sort-select" id="orden">
+      <option value="reciente">Más recientes</option>
+      <option value="antiguo">Más antiguos</option>
+      <option value="mayor">Mayor monto</option>
+      <option value="menor">Menor monto</option>
+    </select>
+  </div>
+
+  <div class="kpis" id="resumen" style="margin-bottom:20px"></div>
+
+  <div class="box">
+    <div class="box-head">
+      <div><h2>Pedidos</h2><p id="contador"></p></div>
+      <button class="btn btn-ghost btn-sm" type="button" id="btnCSV"></button>
+    </div>
+    <div class="box-body tight"><div class="tabla-wrap" id="tabla"></div></div>
+  </div>
+</div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="admin.js"></script>
+<script>
+(async function () {
+  const A = window.ALFA;
+  if (!(await ADM.iniciar("pedidos", "Pedidos", "Todo lo que ha entrado por la tienda"))) return;
+
+  const $ = (id) => document.getElementById(id);
+  $("icBuscar").innerHTML = A.icon("search");
+  $("btnCSV").innerHTML = A.icon("download") + " Exportar CSV";
+
+  const F = { texto: "", estado: "todos", modo: "todos", orden: "reciente" };
+
+  const GRUPOS = [
+    { id: "todos", label: "Todos", test: () => true },
+    { id: "verificar", label: "Por verificar", test: (o) => !o.cancelado && (o.pagoEstado === "reportado" || o.pagoEstado === "rechazado" || o.pagoEstado === "por-cobrar") },
+    { id: "preparacion", label: "En preparación", test: (o) => !o.cancelado && o.estadoIndex >= 1 && o.estadoIndex <= 2 },
+    { id: "camino", label: "En camino", test: (o) => !o.cancelado && o.estadoIndex >= 3 && o.estadoIndex < A.orders.pasosDe(o).length - 1 },
+    { id: "entregados", label: "Entregados", test: (o) => !o.cancelado && o.estadoIndex >= A.orders.pasosDe(o).length - 1 },
+    { id: "cancelados", label: "Cancelados", test: (o) => o.cancelado },
+  ];
+
+  function pintarFiltros() {
+    const todos = A.orders.all();
+    $("filtroEstado").innerHTML = GRUPOS.map(
+      (g) => `<button type="button" data-g="${g.id}" class="${g.id === F.estado ? "is-active" : ""}">
+        ${g.label}<span class="n">${todos.filter(g.test).length}</span></button>`
+    ).join("");
+  }
+
+  $("filtroEstado").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-g]");
+    if (!b) return;
+    F.estado = b.dataset.g;
+    pintarFiltros();
+    pintar();
+  });
+
+  $("buscar").addEventListener("input", (e) => { F.texto = e.target.value.toLowerCase(); pintar(); });
+  $("filtroModo").addEventListener("change", (e) => { F.modo = e.target.value; pintar(); });
+  $("orden").addEventListener("change", (e) => { F.orden = e.target.value; pintar(); });
+
+  function filtrados() {
+    const grupo = GRUPOS.find((g) => g.id === F.estado);
+    let lista = A.orders.all().filter(grupo.test);
+    if (F.modo !== "todos") lista = lista.filter((o) => o.entrega.modo === F.modo);
+    if (F.texto) {
+      lista = lista.filter((o) =>
+        (o.codigo + " " + o.cliente.nombre + " " + o.cliente.cedula + " " + o.cliente.email + " " +
+          o.cliente.telefono + " " + o.items.map((i) => i.nombre).join(" ") + " " + (o.pago.referencia || "") +
+          " " + (o.guia || "")).toLowerCase().includes(F.texto)
+      );
+    }
+    const ord = {
+      reciente: (a, b) => new Date(b.creado) - new Date(a.creado),
+      antiguo: (a, b) => new Date(a.creado) - new Date(b.creado),
+      mayor: (a, b) => b.totales.total - a.totales.total,
+      menor: (a, b) => a.totales.total - b.totales.total,
+    }[F.orden];
+    return lista.sort(ord);
+  }
+
+  function pintarResumen() {
+    const act = A.orders.activos();
+    const items = [
+      ["receipt", "", "Pedidos totales", A.orders.all().length, `${act.length} activos · ${A.orders.all().length - act.length} cancelados`],
+      ["dollar", "green", "Facturado", A.fmtUSD(A.orders.ingresos(false)), `${A.fmtUSD(A.orders.ingresos(true))} con pago verificado`],
+      ["clock", "amber", "Sin despachar", act.filter((o) => o.estadoIndex < 3).length, "Pendientes de salir del almacén"],
+      ["checkCircle", "green", "Entregados", A.orders.entregados().length, "Ciclo completado"],
+    ];
+    $("resumen").innerHTML = items
+      .map(([ic, col, dt, dd, sub]) => `<div class="kpi">
+        <div class="kpi-ic ${col}">${A.icon(ic)}</div>
+        <dt>${dt}</dt><dd>${dd}</dd><span class="sub">${sub}</span></div>`)
+      .join("");
+  }
+
+  function pintar() {
+    const lista = filtrados();
+    $("contador").textContent = `${lista.length} ${lista.length === 1 ? "pedido" : "pedidos"} en pantalla`;
+
+    $("tabla").innerHTML = lista.length
+      ? `<table class="tabla">
+        <thead><tr>
+          <th>Pedido</th><th>Cliente</th><th>Equipos</th><th>Entrega</th>
+          <th>Estado</th><th>Pago</th><th class="num">Total</th><th class="acciones">Acciones</th>
+        </tr></thead>
+        <tbody>${lista.map(fila).join("")}</tbody>
+      </table>`
+      : ADM.vacio("search", "Sin resultados", "Ningún pedido coincide con el filtro. Prueba con otra búsqueda.");
+  }
+
+  function fila(o) {
+    const unidades = o.items.reduce((s, i) => s + i.qty, 0);
+    return `<tr data-codigo="${o.codigo}">
+      <td>
+        <span class="principal mono" style="font-size:.8rem">${o.codigo}</span>
+        <div class="sec">${A.fmtFecha(o.creado)} · ${ADM.hace(o.creado)}</div>
+      </td>
+      <td>
+        <span class="principal">${A.escape(o.cliente.nombre)}</span>
+        <div class="sec">${A.escape(o.cliente.telefono)}</div>
+      </td>
+      <td>
+        <div class="row" style="gap:7px">
+          <span class="mini-img"><img src="${A.img(o.items[0].img)}" alt=""></span>
+          <span>
+            <span style="font-size:.82rem;color:var(--brand-deep);font-weight:600">${A.escape(o.items[0].nombre)}</span>
+            <div class="sec">${unidades} ${unidades === 1 ? "unidad" : "unidades"}${o.items.length > 1 ? ` · ${o.items.length} modelos` : ""}</div>
+          </span>
+        </div>
+      </td>
+      <td>
+        <span style="font-size:.82rem">${o.entrega.modo === "tienda" ? "Retiro en tienda" : "Delivery"}</span>
+        <div class="sec">${A.escape(o.entrega.modo === "tienda" ? (o.entrega.tiendaNombre || "").replace("Alfa ", "") : o.entrega.ciudad || "")}</div>
+      </td>
+      <td>${ADM.estadoBadge(o)}</td>
+      <td>${ADM.pagoBadge(o)}<div class="sec">${ADM.metodoLabel(o.pago.metodo)}</div></td>
+      <td class="num"><strong>${A.fmtUSD(o.totales.total)}</strong><div class="sec">${A.fmtBsRaw(o.totales.totalBs)}</div></td>
+      <td class="acciones">
+        <button class="tbtn" type="button" onclick="verPedido('${o.codigo}')" title="Ver detalle">${A.icon("eye")}</button>
+        <a class="tbtn" href="../seguimiento.html?codigo=${o.codigo}" target="_blank" rel="noopener" title="Ver como el cliente">${A.icon("pin")}</a>
+      </td>
+    </tr>`;
+  }
+
+  /* ==================== Detalle ==================== */
+  window.verPedido = function (codigo) {
+    const o = A.orders.find(codigo);
+    if (!o) return;
+    const pasos = A.orders.pasosDe(o);
+    const esTienda = o.entrega.modo === "tienda";
+    const fechaDe = (id) => { const h = o.historial.find((x) => x.paso === id); return h ? A.fmtFechaHora(h.fecha) : null; };
+
+    const titulo = `<div>
+        <span class="mono" style="font-size:1.15rem;font-weight:800;color:var(--brand-deep)">${o.codigo}</span>
+        <div class="row" style="gap:7px;margin-top:6px">${ADM.estadoBadge(o)}${ADM.pagoBadge(o)}</div>
+      </div>`;
+
+    const cuerpo = `
+      ${o.cancelado ? `<div class="notice notice-red" style="margin-bottom:18px">${A.icon("alert")}<span><strong>Pedido cancelado.</strong> ${A.escape(o.motivoCancelacion || "")}</span></div>` : ""}
+      ${o.pagoEstado === "rechazado" ? `<div class="notice notice-red" style="margin-bottom:18px">${A.icon("alert")}<span><strong>Pago rechazado.</strong> ${A.escape(o.pagoMotivo || "")}</span></div>` : ""}
+
+      <div class="det-sec">
+        <h4>Cliente</h4>
+        <dl class="dl">
+          <div class="dl-row"><dt>Nombre</dt><dd>${A.escape(o.cliente.nombre)}</dd></div>
+          <div class="dl-row"><dt>Cédula / RIF</dt><dd>${A.escape(o.cliente.cedula)}</dd></div>
+          <div class="dl-row"><dt>Teléfono</dt><dd>${A.escape(o.cliente.telefono)}</dd></div>
+          <div class="dl-row"><dt>Correo</dt><dd>${A.escape(o.cliente.email)}</dd></div>
+          ${o.cliente.empresa ? `<div class="dl-row"><dt>Factura a</dt><dd>${A.escape(o.cliente.empresa.razonSocial)} · ${A.escape(o.cliente.empresa.rif)}</dd></div>` : ""}
+        </dl>
+      </div>
+
+      <div class="det-sec">
+        <h4>Equipos</h4>
+        ${o.items.map((it) => `
+          <div class="order-mini">
+            <span class="mini-img" style="width:54px;height:46px"><img src="${A.img(it.img)}" alt=""></span>
+            <div class="grow">
+              <strong style="font-size:.88rem;color:var(--brand-deep);display:block">${A.escape(it.nombre)}</strong>
+              <span class="tiny muted">${it.qty} × ${A.fmtUSD(it.precio)}</span>
+            </div>
+            <strong style="font-size:.88rem;color:var(--brand-deep)">${A.fmtUSD(it.precio * it.qty)}</strong>
+          </div>`).join("")}
+        <div class="totals" style="margin-top:14px">
+          <div class="total-row"><span>Subtotal</span><span>${A.fmtUSD(o.totales.subtotal)}</span></div>
+          <div class="total-row"><span>Envío</span><span>${o.totales.envio === 0 ? (o.totales.envioGratis ? "Gratis" : "Sin costo") : A.fmtUSD(o.totales.envio)}</span></div>
+          <div class="total-row"><span>IVA (16 %)</span><span>${A.fmtUSD(o.totales.iva)}</span></div>
+          ${o.totales.descuento > 0 ? `<div class="total-row" style="color:var(--green-600)"><span>Descuento pago en Bs</span><span>−${A.fmtUSD(o.totales.descuento)}</span></div>` : ""}
+          <div class="total-row is-grand"><span>Total</span><span>${A.fmtUSD(o.totales.total)}</span></div>
+          <div class="total-row" style="justify-content:flex-end"><span class="tiny">${A.fmtBsRaw(o.totales.totalBs)}</span></div>
+        </div>
+      </div>
+
+      <div class="det-sec">
+        <h4>Pago</h4>
+        <dl class="dl">
+          <div class="dl-row"><dt>Método</dt><dd>${ADM.metodoLabel(o.pago.metodo)}</dd></div>
+          ${o.pago.banco ? `<div class="dl-row"><dt>Banco</dt><dd>${A.escape(o.pago.banco)}</dd></div>` : ""}
+          ${o.pago.referencia ? `<div class="dl-row"><dt>Referencia</dt><dd class="mono">${A.escape(o.pago.referencia)}</dd></div>` : ""}
+          ${o.pago.telefono ? `<div class="dl-row"><dt>Teléfono emisor</dt><dd>${A.escape(o.pago.telefono)}</dd></div>` : ""}
+          ${o.pago.cedula ? `<div class="dl-row"><dt>Cédula emisor</dt><dd>${A.escape(o.pago.cedula)}</dd></div>` : ""}
+          ${o.pago.titular ? `<div class="dl-row"><dt>Titular</dt><dd>${A.escape(o.pago.titular)}</dd></div>` : ""}
+          ${o.pago.fecha ? `<div class="dl-row"><dt>Fecha del pago</dt><dd>${o.pago.fecha}</dd></div>` : ""}
+          <div class="dl-row"><dt>Monto en Bs</dt><dd>${A.fmtBsRaw(o.pago.montoBs)}</dd></div>
+          ${o.pago.comprobante ? `<div class="dl-row"><dt>Comprobante</dt><dd>${A.escape(o.pago.comprobante)}</dd></div>` : ""}
+        </dl>
+      </div>
+
+      <div class="det-sec">
+        <h4>${esTienda ? "Retiro" : "Entrega"}</h4>
+        <dl class="dl">
+          ${esTienda
+            ? `<div class="dl-row"><dt>Tienda</dt><dd>${A.escape(o.entrega.tiendaNombre)}</dd></div>
+               <div class="dl-row"><dt>Dirección</dt><dd>${A.escape(o.entrega.direccion)}</dd></div>
+               ${o.entrega.retiraOtro ? `<div class="dl-row"><dt>Retira</dt><dd>${A.escape(o.entrega.retiraOtro)}</dd></div>` : ""}`
+            : `<div class="dl-row"><dt>Dirección</dt><dd>${A.escape(o.entrega.direccion)}</dd></div>
+               <div class="dl-row"><dt>Ciudad</dt><dd>${A.escape(o.entrega.ciudad || "")}</dd></div>
+               <div class="dl-row"><dt>Zona</dt><dd>${A.escape(o.entrega.zonaNombre || "")}</dd></div>
+               ${o.entrega.referencia ? `<div class="dl-row"><dt>Referencia</dt><dd>${A.escape(o.entrega.referencia)}</dd></div>` : ""}
+               ${o.entrega.nota ? `<div class="dl-row"><dt>Nota del cliente</dt><dd>${A.escape(o.entrega.nota)}</dd></div>` : ""}
+               <div class="dl-row"><dt>Courier</dt><dd>${A.escape(o.courier || "Sin asignar")}</dd></div>
+               <div class="dl-row"><dt>Guía</dt><dd class="mono">${A.escape(o.guia || "—")}</dd></div>
+               ${o.repartidor ? `<div class="dl-row"><dt>Repartidor</dt><dd>${A.escape(o.repartidor.nombre)} · ${A.escape(o.repartidor.telefono)}</dd></div>` : ""}`}
+          <div class="dl-row"><dt>Fecha estimada</dt><dd>${A.fmtFecha(o.eta)}</dd></div>
+        </dl>
+      </div>
+
+      <div class="det-sec">
+        <h4>Avance</h4>
+        <div class="timeline-mini">
+          ${pasos.map((p, i) => `<div class="tm-item ${i <= o.estadoIndex ? "on" : ""}">
+            <strong>${p.titulo}</strong>
+            <span>${fechaDe(p.id) || "Pendiente"}</span>
+          </div>`).join("")}
+        </div>
+        ${!o.cancelado ? `
+        <div class="field" style="margin-top:16px">
+          <label for="selEstado">Cambiar estado manualmente</label>
+          <select class="select" id="selEstado">
+            ${pasos.map((p, i) => `<option value="${i}"${i === o.estadoIndex ? " selected" : ""}>${i + 1}. ${p.titulo}</option>`).join("")}
+          </select>
+        </div>` : ""}
+      </div>
+
+      <div class="det-sec">
+        <h4>Notas internas</h4>
+        <div class="field" style="margin-bottom:12px">
+          <textarea class="textarea" id="notaTexto" rows="2" placeholder="Ej.: el cliente pidió entregar después de las 3 pm"></textarea>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" id="btnNota">Agregar nota</button>
+        <div class="stack-8" style="margin-top:14px">
+          ${(o.notas || []).length
+            ? o.notas.map((n) => `<div class="nota"><p>${A.escape(n.texto)}</p><span>${A.escape(n.usuario)} · ${ADM.hace(n.fecha)}</span></div>`).join("")
+            : '<p class="tiny muted">Sin notas todavía.</p>'}
+        </div>
+      </div>`;
+
+    const pie = `
+      <a class="btn btn-ghost btn-sm" href="../seguimiento.html?codigo=${o.codigo}" target="_blank" rel="noopener">${A.icon("eye")} Vista del cliente</a>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="window.print()">${A.icon("print")} Imprimir</button>
+      ${o.cancelado
+        ? `<button class="btn btn-soft btn-sm" type="button" id="btnReactivar">${A.icon("refresh")} Reactivar</button>`
+        : `<button class="btn btn-ghost btn-sm" type="button" id="btnCancelar" style="color:var(--red-600);border-color:var(--red-100)">${A.icon("xCircle")} Cancelar pedido</button>`}
+      ${!o.cancelado && o.estadoIndex < pasos.length - 1
+        ? `<button class="btn btn-primary btn-sm grow" type="button" id="btnAvanzar">${A.icon("arrowRight")} Pasar a “${pasos[o.estadoIndex + 1].titulo}”</button>`
+        : ""}`;
+
+    ADM.detalle(titulo, cuerpo, pie);
+
+    const sel = document.getElementById("selEstado");
+    if (sel) sel.onchange = () => { A.orders.setEstado(o.codigo, +sel.value); refrescar(o.codigo, "Estado actualizado"); };
+
+    const bA = document.getElementById("btnAvanzar");
+    if (bA) bA.onclick = () => { A.orders.avanzar(o.codigo); refrescar(o.codigo, "Pedido avanzado"); };
+
+    const bN = document.getElementById("btnNota");
+    if (bN) bN.onclick = () => {
+      const t = document.getElementById("notaTexto").value.trim();
+      if (!t) return A.toast("Escribe la nota antes de guardarla", "alert");
+      A.orders.agregarNota(o.codigo, t);
+      refrescar(o.codigo, "Nota guardada");
+    };
+
+    const bC = document.getElementById("btnCancelar");
+    if (bC) bC.onclick = () => {
+      ADM.modal({
+        titulo: "Cancelar pedido " + o.codigo,
+        ancho: "angosto",
+        cuerpo: `<p class="small" style="color:var(--ink-soft);margin-bottom:14px">Las unidades vuelven al inventario y el cliente verá el pedido como cancelado en el seguimiento.</p>
+          <div class="field">
+            <label for="motivoCancel">Motivo</label>
+            <select class="select" id="motivoCancel">
+              <option>El cliente pidió cancelar</option>
+              <option>No se pudo verificar el pago</option>
+              <option>Sin inventario disponible</option>
+              <option>Datos de entrega incorrectos</option>
+              <option>Pedido duplicado</option>
+            </select>
+          </div>`,
+        pie: `<button class="btn btn-ghost" type="button" onclick="ADM.cerrarModal()">Volver</button>
+              <button class="btn btn-primary" style="background:var(--red-600)" type="button" id="okCancel">Cancelar pedido</button>`,
+        alAbrir: (bg) => {
+          bg.querySelector("#okCancel").onclick = () => {
+            A.orders.cancelar(o.codigo, bg.querySelector("#motivoCancel").value);
+            ADM.cerrarModal();
+            refrescar(o.codigo, "Pedido cancelado y stock devuelto");
+          };
+        },
+      });
+    };
+
+    const bR = document.getElementById("btnReactivar");
+    if (bR) bR.onclick = () =>
+      ADM.confirmar("Reactivar pedido", "Se volverá a descontar el inventario de los equipos incluidos.", () => {
+        A.orders.reactivar(o.codigo);
+        refrescar(o.codigo, "Pedido reactivado");
+      }, "Reactivar");
+  };
+
+  function refrescar(codigo, mensaje) {
+    pintarFiltros();
+    pintarResumen();
+    pintar();
+    verPedido(codigo);
+    if (mensaje) A.toast(mensaje, "checkCircle");
+  }
+
+  /* ==================== Exportar ==================== */
+  $("btnCSV").onclick = () => {
+    const lista = filtrados();
+    ADM.exportarCSV(
+      "pedidos-alfa",
+      ["Codigo", "Fecha", "Cliente", "Cedula", "Telefono", "Correo", "Equipos", "Unidades", "Entrega", "Ciudad/Tienda", "Estado", "Pago", "Metodo", "Referencia", "Total USD", "Total Bs"],
+      lista.map((o) => [
+        o.codigo,
+        A.fmtFecha(o.creado),
+        o.cliente.nombre,
+        o.cliente.cedula,
+        o.cliente.telefono,
+        o.cliente.email,
+        o.items.map((i) => `${i.qty}× ${i.nombre}`).join(" | "),
+        o.items.reduce((s, i) => s + i.qty, 0),
+        o.entrega.modo === "tienda" ? "Retiro en tienda" : "Delivery",
+        o.entrega.modo === "tienda" ? o.entrega.tiendaNombre : o.entrega.ciudad,
+        o.cancelado ? "Cancelado" : A.orders.pasosDe(o)[o.estadoIndex].titulo,
+        o.pagoEstado,
+        ADM.metodoLabel(o.pago.metodo),
+        o.pago.referencia || "",
+        o.totales.total.toFixed(2),
+        o.totales.totalBs.toFixed(2),
+      ])
+    );
+  };
+
+  /* ==================== Arranque ==================== */
+  pintarFiltros();
+  pintarResumen();
+  pintar();
+
+  const params = new URLSearchParams(location.search);
+  if (params.get("estado") === "1") { F.estado = "preparacion"; pintarFiltros(); pintar(); }
+  if (params.get("codigo")) setTimeout(() => verPedido(params.get("codigo")), 250);
+})();
+</script>
+</body>
+</html>

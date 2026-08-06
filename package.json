@@ -1,0 +1,14 @@
+{
+  "name": "alfa-tienda",
+  "version": "2.0.0",
+  "description": "Tienda online de laptops Alfa — backend en Netlify Functions + Supabase",
+  "type": "module",
+  "scripts": {
+    "test": "node tools/test_api.mjs",
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "bcryptjs": "^2.4.3"
+  }
+}

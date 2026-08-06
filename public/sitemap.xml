@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>/index.html</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>/producto.html?id=zenith-14</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=zenith-16-pro</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=vortex-x15</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=vortex-x17-titan</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=nova-air-13</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=flex-360</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=studio-pro-16</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=core-15</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=edge-14-business</loc><priority>0.8</priority></url>
+  <url><loc>/producto.html?id=spark-11</loc><priority>0.8</priority></url>
+  <url><loc>/seguimiento.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+</urlset>
