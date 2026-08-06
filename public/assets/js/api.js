@@ -143,6 +143,7 @@ ALFA.api = (function () {
 
     crearPedido: (orden) => pedir("/pedido", { metodo: "POST", cuerpo: orden }),
     buscarPedido: (codigo) => pedir("/pedido/" + encodeURIComponent(codigo)),
+    eliminarPedido: (codigo) => pedir("/pedido/" + encodeURIComponent(codigo), { metodo: "DELETE" }),
 
     async entrar(usuario, clave) {
       const d = await pedir("/sesion", { metodo: "POST", cuerpo: { usuario, clave } });
