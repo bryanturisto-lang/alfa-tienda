@@ -434,6 +434,9 @@ window.ADM = (function () {
       "pago-movil": "Pago móvil",
       transferencia: "Transferencia",
       zelle: "Zelle",
+      binance: "Binance (USDT)",
+      paypal: "PayPal",
+      "banesco-panama": "Banesco Panamá",
       efectivo: "Efectivo en tienda",
     }[m] || m;
   };

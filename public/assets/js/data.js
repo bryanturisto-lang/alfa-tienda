@@ -28,21 +28,27 @@ ALFA.config = {
 
   // Datos para pago móvil (los que ve el cliente al pagar)
   pagoMovil: {
-    banco: "0134 — Banesco",
-    rif: "J-50123456-7",
-    telefono: "0412-5550110",
-    titular: "Alfa Computación C.A.",
+    banco: "0102 — Banco de Venezuela",
+    rif: "V-14.956.906",
+    telefono: "0424-4152658",
+    titular: "Ruben Antonio Bonilla Hernández",
   },
 
   transferencia: {
     banco: "0102 — Banco de Venezuela",
-    cuenta: "0102-0000-00-0000000000",
+    cuenta: "0102-0692-89-0000124407",
     tipo: "Corriente",
-    titular: "Alfa Computación C.A.",
-    rif: "J-50123456-7",
+    titular: "Ruben Antonio Bonilla Hernández",
+    rif: "V-14.956.906",
   },
 
-  zelle: { email: "pagos@alfa.com.ve", titular: "Alfa Computacion LLC" },
+  zelle: { email: "basik.agencia@gmail.com", titular: "Carlos García" },
+
+  binance: { id: "1112686561", alias: "Alfa Digital Store" },
+
+  paypal: { titular: "Ruben Bonilla Hernandez", email: "ruben.b.1495@gmail.com", nota: "Recuerda que PayPal cobra una comisión aparte." },
+
+  banescoPanama: { titular: "Yeremy Bonilla", banco: "Banesco Panamá", cuenta: "221022934666", tipo: "Cuenta corriente" },
 
   bancos: [
     "0102 — Banco de Venezuela", "0104 — Venezolano de Crédito",
@@ -58,25 +64,11 @@ ALFA.config = {
   // Tiendas físicas para retiro
   tiendas: [
     {
-      id: "ccct",
-      nombre: "Alfa CCCT — Caracas",
-      direccion: "Nivel C2, Local 45-B, CCCT, Chuao, Caracas",
-      horario: "Lun a Sáb · 10:00 a 19:00",
-      telefono: "+58 212-555-0110",
-    },
-    {
-      id: "sambil-valencia",
-      nombre: "Alfa Sambil Valencia",
-      direccion: "Nivel Feria, Local 118, Av. Bolívar Norte, Valencia",
-      horario: "Lun a Dom · 11:00 a 20:00",
-      telefono: "+58 241-555-0112",
-    },
-    {
-      id: "maracaibo",
-      nombre: "Alfa Maracaibo — Delicias",
-      direccion: "Av. Las Delicias con calle 72, Edif. Centro Sur, PB",
-      horario: "Lun a Vie · 09:00 a 18:00 · Sáb 09:00 a 14:00",
-      telefono: "+58 261-555-0114",
+      id: "naguanagua",
+      nombre: "Alfa Digital Store — Naguanagua",
+      direccion: "Av. Universidad, sector La Granja, CC Freemarket, piso 1, local T-38, municipio Naguanagua, estado Carabobo",
+      horario: "Lun a Sáb · 9:00 a 18:00",
+      telefono: "+58 414-685-5453 / +58 414-143-4892",
     },
   ],
 

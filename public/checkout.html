@@ -292,6 +292,60 @@
                 </form>
               </div>
 
+              <!-- Binance -->
+              <div id="bloqueBinance" class="hidden" style="margin-top:24px">
+                <h3 style="font-size:1rem;margin-bottom:12px">Envía el USDT a este ID de Binance Pay</h3>
+                <div class="bank-box"><dl id="datosBinance"></dl></div>
+                <form id="formBinance" class="grid-2" style="margin-top:20px" novalidate>
+                  <div class="field">
+                    <label for="bnUsuario">Tu usuario o correo de Binance <span class="req">*</span></label>
+                    <input class="input" id="bnUsuario" placeholder="usuario@binance.com">
+                    <span class="field-error">Ingresa tu usuario o correo de Binance.</span>
+                  </div>
+                  <div class="field">
+                    <label for="bnConfirmacion">ID de la transacción <span class="req">*</span></label>
+                    <input class="input" id="bnConfirmacion" placeholder="Ej.: 118822334455">
+                    <span class="field-error">Ingresa el ID de la transacción.</span>
+                  </div>
+                </form>
+              </div>
+
+              <!-- PayPal -->
+              <div id="bloquePaypal" class="hidden" style="margin-top:24px">
+                <h3 style="font-size:1rem;margin-bottom:12px">Envía el pago a estos datos</h3>
+                <div class="bank-box"><dl id="datosPaypal"></dl></div>
+                <form id="formPaypal" class="grid-2" style="margin-top:20px" novalidate>
+                  <div class="field">
+                    <label for="ppEmail">Correo desde el que enviaste <span class="req">*</span></label>
+                    <input class="input" id="ppEmail" type="email" placeholder="maria@correo.com">
+                    <span class="field-error">Revisa el correo.</span>
+                  </div>
+                  <div class="field col-span-2">
+                    <label for="ppConfirmacion">Número de transacción <span class="req">*</span></label>
+                    <input class="input" id="ppConfirmacion" placeholder="Ej.: 5AB123456C789012D">
+                    <span class="field-error">Ingresa el número de transacción de PayPal.</span>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Banesco Panamá -->
+              <div id="bloqueBanescoPanama" class="hidden" style="margin-top:24px">
+                <h3 style="font-size:1rem;margin-bottom:12px">Transfiere a esta cuenta en Panamá</h3>
+                <div class="bank-box"><dl id="datosBanescoPanama"></dl></div>
+                <form id="formBanescoPanama" class="grid-2" style="margin-top:20px" novalidate>
+                  <div class="field">
+                    <label for="bpTitular">Titular de la cuenta emisora <span class="req">*</span></label>
+                    <input class="input" id="bpTitular" placeholder="María Rodríguez">
+                    <span class="field-error">Escribe el nombre del titular.</span>
+                  </div>
+                  <div class="field">
+                    <label for="bpReferencia">Número de referencia <span class="req">*</span></label>
+                    <input class="input" id="bpReferencia" placeholder="Ej.: 0091774" inputmode="numeric">
+                    <span class="field-error">Ingresa el número de referencia.</span>
+                  </div>
+                </form>
+              </div>
+
               <!-- Efectivo en tienda -->
               <div id="bloqueEfectivo" class="hidden" style="margin-top:24px">
                 <div class="notice notice-green" id="avisoEfectivo"></div>
@@ -405,6 +459,9 @@
       { id: "pago-movil", ic: "phone", t: "Pago móvil", d: "Desde tu banco al teléfono de Alfa. Verificamos en minutos.", tag: "−5 %" },
       { id: "transferencia", ic: "card", t: "Transferencia bancaria", d: "A nuestra cuenta corriente en Banco de Venezuela.", tag: "−5 %" },
       { id: "zelle", ic: "mail", t: "Zelle", d: "Pago en dólares desde una cuenta en Estados Unidos.", tag: "" },
+      { id: "binance", ic: "coin", t: "Binance (USDT)", d: "Transfiere USDT a nuestro ID de Binance Pay.", tag: "" },
+      { id: "paypal", ic: "globe", t: "PayPal", d: "Pago en dólares desde tu cuenta de PayPal.", tag: "" },
+      { id: "banesco-panama", ic: "bank", t: "Banesco Panamá", d: "Transferencia internacional a cuenta en Panamá.", tag: "" },
     ];
     if (S.modo === "tienda") {
       metodos.push({ id: "efectivo", ic: "store", t: "Efectivo al retirar", d: "Pagas en el mostrador cuando pases a buscar el equipo.", tag: "" });
@@ -449,6 +506,21 @@
   $("#datosZelle").innerHTML =
     filaBanco("Correo", CFG.zelle.email, true) +
     filaBanco("Titular", CFG.zelle.titular, false);
+
+  $("#datosBinance").innerHTML =
+    filaBanco("Binance ID", CFG.binance.id, true) +
+    filaBanco("Alias", CFG.binance.alias, false);
+
+  $("#datosPaypal").innerHTML =
+    filaBanco("Correo", CFG.paypal.email, true) +
+    filaBanco("Titular", CFG.paypal.titular, false) +
+    (CFG.paypal.nota ? `<div class="bank-row"><dd class="tiny muted" style="grid-column:1/-1">${A.escape(CFG.paypal.nota)}</dd></div>` : "");
+
+  $("#datosBanescoPanama").innerHTML =
+    filaBanco("Banco", CFG.banescoPanama.banco, false) +
+    filaBanco("N.º de cuenta", CFG.banescoPanama.cuenta, true) +
+    filaBanco("Tipo", CFG.banescoPanama.tipo, false) +
+    filaBanco("Titular", CFG.banescoPanama.titular, false);
 
   const opcionesBanco = CFG.bancos.map((b) => `<option>${b}</option>`).join("");
   $("#pmBanco").innerHTML = opcionesBanco;
@@ -573,6 +645,15 @@
       ok = chequear("#zlTitular", (v) => A.validar.minLen(v, 5)) && ok;
       ok = chequear("#zlEmail", A.validar.email) && ok;
       ok = chequear("#zlConfirmacion", (v) => A.validar.minLen(v, 4)) && ok;
+    } else if (S.metodo === "binance") {
+      ok = chequear("#bnUsuario", (v) => A.validar.minLen(v, 3)) && ok;
+      ok = chequear("#bnConfirmacion", (v) => A.validar.minLen(v, 4)) && ok;
+    } else if (S.metodo === "paypal") {
+      ok = chequear("#ppEmail", A.validar.email) && ok;
+      ok = chequear("#ppConfirmacion", (v) => A.validar.minLen(v, 4)) && ok;
+    } else if (S.metodo === "banesco-panama") {
+      ok = chequear("#bpTitular", (v) => A.validar.minLen(v, 5)) && ok;
+      ok = chequear("#bpReferencia", (v) => A.validar.minLen(v, 4)) && ok;
     }
     const terminos = $("#aceptaTerminos").checked;
     $("#errTerminos").classList.toggle("is-shown", !terminos);
@@ -622,6 +703,9 @@
     $("#bloquePagoMovil").classList.toggle("hidden", S.metodo !== "pago-movil");
     $("#bloqueTransferencia").classList.toggle("hidden", S.metodo !== "transferencia");
     $("#bloqueZelle").classList.toggle("hidden", S.metodo !== "zelle");
+    $("#bloqueBinance").classList.toggle("hidden", S.metodo !== "binance");
+    $("#bloquePaypal").classList.toggle("hidden", S.metodo !== "paypal");
+    $("#bloqueBanescoPanama").classList.toggle("hidden", S.metodo !== "banesco-panama");
     $("#bloqueEfectivo").classList.toggle("hidden", S.metodo !== "efectivo");
   }
 
@@ -685,6 +769,21 @@
           titular: $("#zlTitular").value.trim(),
           email: $("#zlEmail").value.trim(),
           referencia: $("#zlConfirmacion").value.trim(),
+        });
+      } else if (S.metodo === "binance") {
+        Object.assign(pago, {
+          usuario: $("#bnUsuario").value.trim(),
+          referencia: $("#bnConfirmacion").value.trim(),
+        });
+      } else if (S.metodo === "paypal") {
+        Object.assign(pago, {
+          email: $("#ppEmail").value.trim(),
+          referencia: $("#ppConfirmacion").value.trim(),
+        });
+      } else if (S.metodo === "banesco-panama") {
+        Object.assign(pago, {
+          titular: $("#bpTitular").value.trim(),
+          referencia: $("#bpReferencia").value.trim(),
         });
       } else {
         Object.assign(pago, { moneda: $("#efMoneda").value, pendiente: true });
@@ -753,6 +852,9 @@
       "pago-movil": "Pago móvil",
       transferencia: "Transferencia bancaria",
       zelle: "Zelle",
+      binance: "Binance (USDT)",
+      paypal: "PayPal",
+      "banesco-panama": "Banesco Panamá",
       efectivo: "Efectivo al retirar",
     }[o.pago.metodo];
 

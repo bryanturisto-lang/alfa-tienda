@@ -108,7 +108,8 @@
       ["Banco emisor", o.pago.banco || "—"],
       ["Referencia", `<span class="mono" style="font-size:1rem;letter-spacing:.06em">${A.escape(o.pago.referencia || "—")}</span>`],
       ["Teléfono emisor", o.pago.telefono || "—"],
-      ["Cédula emisor", o.pago.cedula || o.pago.titular || "—"],
+      ["Usuario / Correo", o.pago.usuario || o.pago.email || "—"],
+      ["Cédula / Titular", o.pago.cedula || o.pago.titular || "—"],
       ["Fecha del pago", o.pago.fecha || A.fmtFecha(o.creado)],
       ["Comprobante", o.pago.comprobante ? A.escape(o.pago.comprobante) : "No adjuntó"],
     ];
@@ -143,7 +144,13 @@
           <div>
             <h4 style="font-size:.69rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-muted);margin-bottom:10px">Contra qué comparar</h4>
             <div class="bank-box" style="padding:14px">
-              <div class="bank-row"><dt>Cuenta destino</dt><dd>${A.escape(o.pago.metodo === "transferencia" ? A.config.transferencia.banco : o.pago.metodo === "zelle" ? A.config.zelle.email : A.config.pagoMovil.banco)}</dd></div>
+              <div class="bank-row"><dt>Cuenta destino</dt><dd>${A.escape({
+                "transferencia": A.config.transferencia.banco,
+                "zelle": A.config.zelle.email,
+                "binance": A.config.binance.id,
+                "paypal": A.config.paypal.email,
+                "banesco-panama": A.config.banescoPanama.cuenta,
+              }[o.pago.metodo] || A.config.pagoMovil.banco)}</dd></div>
               <div class="bank-row"><dt>Monto esperado</dt><dd>${A.fmtBsRaw(o.totales.totalBs)}</dd></div>
               <div class="bank-row"><dt>Pedido</dt><dd>${o.items.reduce((s, i) => s + i.qty, 0)} equipo(s)</dd></div>
               <div class="bank-row"><dt>Entrega</dt><dd>${o.entrega.modo === "tienda" ? "Retiro" : A.escape(o.entrega.ciudad || "Delivery")}</dd></div>
