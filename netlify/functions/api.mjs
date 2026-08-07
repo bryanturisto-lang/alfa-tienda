@@ -370,7 +370,7 @@ export default async (req, context) => {
       await Promise.all([
         telCliente
           ? enviarWhatsApp(sb, telCliente,
-              `¡Hola${nombreCliente ? " " + nombreCliente : ""}! 👋 Gracias por comprar en *Alfa*. Ya recibimos tu pedido *${codigo}* por ${totalTxt}.\n\nEn cuanto verifiquemos tu pago te avisamos para que empecemos a prepararlo. Cualquier duda, aquí estamos. 💻`,
+              `🟢 *Pedido recibido (Pago pendiente)*\n\n👋 ¡Hola${nombreCliente ? ", " + nombreCliente : ""}!\nGracias por comprar en Alfa. Hemos recibido tu pedido *${codigo}* por un total de ${totalTxt}.\n\nAhora nuestro equipo verificará el pago. Una vez confirmado, comenzaremos a preparar tu pedido y te notificaremos de inmediato.\n\nSi tienes alguna duda, responde a este mensaje. ¡Con gusto te ayudaremos! 💻`,
               codigo)
           : Promise.resolve(),
         notificarGrupoInterno(sb,
@@ -476,12 +476,12 @@ export default async (req, context) => {
 
           if (antes.pago_estado !== "verificado" && o.pagoEstado === "verificado") {
             if (tel) await enviarWhatsApp(sb, tel,
-              `${saludo} ✅ Ya verificamos el pago de tu pedido *${o.codigo}*. Lo estamos preparando con cariño, en breve te seguimos contando. ¡Gracias por tu compra! 💙`,
+              `✅ *Pago verificado*\n\n🎉 ¡Hola, ${nombre}!\n¡Buenas noticias! Hemos verificado correctamente el pago de tu pedido *${o.codigo}*.\n\nNuestro equipo ya comenzó a preparar tu pedido. Te mantendremos informado sobre cada etapa hasta su entrega.\n\nGracias por confiar en Alfa. 💙`,
               o.codigo);
           }
           if (antes.pago_estado !== "rechazado" && o.pagoEstado === "rechazado") {
             if (tel) await enviarWhatsApp(sb, tel,
-              `${saludo} No logramos verificar el pago de tu pedido *${o.codigo}*${o.motivoRechazo ? " — " + o.motivoRechazo : ""}. No te preocupes, escríbenos por aquí mismo y lo resolvemos juntos. 🙌`,
+              `🔴 *Pago no verificado*\n\n👋 ¡Hola, ${nombre}!\nIntentamos verificar el pago correspondiente a tu pedido *${o.codigo}*, pero por el momento no fue posible confirmarlo.\n\nNo te preocupes, podemos ayudarte a resolverlo. Solo responde a este mensaje y nuestro equipo revisará tu caso lo antes posible. 🤝`,
               o.codigo);
             await notificarGrupoInterno(sb, `⚠️ *Pago rechazado* — pedido ${o.codigo}\n👤 ${nombre || "Cliente"}`, o.codigo);
           }
