@@ -173,7 +173,7 @@
   window.avisarPagoVerificado = function (codigo) {
     const o = A.orders.find(codigo);
     if (!o || !o.cliente || !o.cliente.telefono) return;
-    const msj = `¡Hola ${o.cliente.nombre}! ✅ Verificamos el pago de tu pedido *${o.codigo}*. Ya lo estamos preparando. Gracias por comprar en Alfa.`;
+    const msj = `¡Hola ${o.cliente.nombre}! 👋 Ya verificamos el pago de tu pedido *${o.codigo}*. Lo estamos preparando con cariño. ¡Gracias por comprar en Alfa! 💙`;
     A.abrirWhatsApp(o.cliente.telefono, msj);
   };
 
