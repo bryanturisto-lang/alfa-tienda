@@ -341,7 +341,7 @@ export default async (req, context) => {
       if (existente) {
         // Ya existe (probablemente llegó por la sincronización paralela de la
         // colección completa). No lo pisamos: devolvemos el que ya quedó guardado.
-        return json(201, pedidoDesdeFila(existente));
+        return json(201, { orden: pedidoDesdeFila(existente) });
       }
 
       const fila = filaDesdePedido({ ...body, codigo });
@@ -350,7 +350,7 @@ export default async (req, context) => {
         if (errIns.code === "23505") {
           // Carrera: alguien más lo insertó justo entre el chequeo y el insert.
           const { data: actual } = await sb.from("pedidos").select("*").eq("codigo", codigo).maybeSingle();
-          if (actual) return json(201, pedidoDesdeFila(actual));
+          if (actual) return json(201, { orden: pedidoDesdeFila(actual) });
         }
         throw errIns;
       }
@@ -385,11 +385,11 @@ export default async (req, context) => {
               codigo)
           : Promise.resolve(),
         notificarGrupoInterno(sb,
-          `🛒 *Nuevo pedido* — ${codigo}\n👤 ${nombreCliente || "Cliente"}\n💵 ${totalTxt}\n🚚 ${body.entrega?.modo === "tienda" ? "Retiro en tienda" : "Delivery"}`,
+          `🛒 *Nuevo pedido recibido*\n📋 Orden: *${codigo}*\n👤 Cliente: *${nombreCliente || "Cliente"}*\n💵 Total: *${totalTxt}*\n🏪 Método de entrega: *${body.entrega?.modo === "tienda" ? "Retiro en tienda" : "Delivery"}*\n⏳ Estado: Pago pendiente de verificación.`,
           codigo),
       ]);
 
-      return json(201, pedidoDesdeFila(fila));
+      return json(201, { orden: pedidoDesdeFila(fila) });
     }
 
     // -------- /pedido/:codigo (seguimiento público) --------
@@ -398,7 +398,7 @@ export default async (req, context) => {
       const { data, error: err } = await sb.from("pedidos").select("*").eq("codigo", codigo).maybeSingle();
       if (err) throw err;
       if (!data) return error(404, "No encontramos ese número de pedido.");
-      return json(200, pedidoDesdeFila(data));
+      return json(200, { orden: pedidoDesdeFila(data) });
     }
 
     // -------- /pedido/:codigo (eliminar) — solo administradores --------
@@ -494,7 +494,7 @@ export default async (req, context) => {
             if (tel) await enviarWhatsApp(sb, tel,
               `🔴 *Pago no verificado*\n\n👋 ¡Hola, ${nombre}!\nIntentamos verificar el pago correspondiente a tu pedido *${o.codigo}*, pero por el momento no fue posible confirmarlo.\n\nNo te preocupes, podemos ayudarte a resolverlo. Solo responde a este mensaje y nuestro equipo revisará tu caso lo antes posible. 🤝`,
               o.codigo);
-            await notificarGrupoInterno(sb, `⚠️ *Pago rechazado* — pedido ${o.codigo}\n👤 ${nombre || "Cliente"}`, o.codigo);
+            await notificarGrupoInterno(sb, `⚠️ *Pago rechazado*\n📋 Orden: *${o.codigo}*\n👤 Cliente: *${nombre || "Cliente"}*`, o.codigo);
           }
           if (typeof o.estadoIndex === "number" && antes.estado_index !== o.estadoIndex && tel) {
             const etiquetas = enTienda
