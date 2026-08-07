@@ -891,6 +891,19 @@
     }, 2600);
   };
 
+  /* Abre WhatsApp (app o web) con un mensaje ya escrito. La persona
+     del otro lado tiene que pulsar enviar — no manda nada solo. */
+  A.abrirWhatsApp = function (numero, mensaje) {
+    let d = String(numero || "").replace(/\D/g, "");
+    if (!d) return;
+    // Venezuela: 0412-1234567 (11 dígitos con 0) → 584121234567
+    if (d.startsWith("0") && d.length === 11) d = "58" + d.slice(1);
+    else if (d.length === 10) d = "58" + d; // sin 0 ni código de país
+    else if (!d.startsWith("58")) d = "58" + d.replace(/^0+/, "");
+    const url = `https://wa.me/${d}?text=${encodeURIComponent(mensaje || "")}`;
+    window.open(url, "_blank", "noopener");
+  };
+
   A.copiar = function (texto, btn) {
     const done = () => {
       A.toast("Copiado: " + texto, "copy");

@@ -174,6 +174,13 @@
     </tr>`;
   }
 
+  window.escribirCliente = function (codigo) {
+    const o = A.orders.find(codigo);
+    if (!o || !o.cliente || !o.cliente.telefono) return;
+    const msj = `Hola ${o.cliente.nombre}, te escribimos de Alfa sobre tu pedido *${o.codigo}*.`;
+    A.abrirWhatsApp(o.cliente.telefono, msj);
+  };
+
   /* ==================== Eliminar (doble confirmación) ==================== */
   window.eliminarPedido = function (codigo) {
     ADM.confirmar(
@@ -224,7 +231,9 @@
         <dl class="dl">
           <div class="dl-row"><dt>Nombre</dt><dd>${A.escape(o.cliente.nombre)}</dd></div>
           <div class="dl-row"><dt>Cédula / RIF</dt><dd>${A.escape(o.cliente.cedula)}</dd></div>
-          <div class="dl-row"><dt>Teléfono</dt><dd>${A.escape(o.cliente.telefono)}</dd></div>
+          <div class="dl-row"><dt>Teléfono</dt><dd>${A.escape(o.cliente.telefono)}
+            <button class="tbtn" type="button" onclick="escribirCliente('${o.codigo}')" title="Escribir por WhatsApp" style="margin-left:6px;color:var(--green-600)">${A.icon("whatsapp")}</button>
+          </dd></div>
           <div class="dl-row"><dt>Correo</dt><dd>${A.escape(o.cliente.email)}</dd></div>
           ${o.cliente.empresa ? `<div class="dl-row"><dt>Factura a</dt><dd>${A.escape(o.cliente.empresa.razonSocial)} · ${A.escape(o.cliente.empresa.rif)}</dd></div>` : ""}
         </dl>

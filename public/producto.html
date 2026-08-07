@@ -157,6 +157,10 @@
       ${A.icon("bolt")} Comprar ahora
     </button>
 
+    <button class="btn btn-ghost btn-lg btn-block" id="btnWhatsApp" type="button" style="margin-top:8px">
+      ${A.icon("whatsapp")} Consultar por WhatsApp
+    </button>
+
     <div class="info-grid" style="margin-top:6px">
       <div class="info-cell">
         <dt>Entrega</dt>
@@ -212,6 +216,10 @@
 
   document.getElementById("btnAdd").onclick = () => { A.cart.add(p.id, qty); A.openCart(); };
   document.getElementById("btnBuyNow").onclick = () => { A.cart.add(p.id, qty); location.href = "checkout.html"; };
+  document.getElementById("btnWhatsApp").onclick = () => {
+    const msj = `Hola, quiero consultar por el *${p.nombre}* (${A.fmtUSD(p.precio)}). ¿Está disponible?`;
+    A.abrirWhatsApp(A.config.contact.whatsapp, msj);
+  };
 
   const fav = document.getElementById("btnFav");
   if (A.favs.has(p.id)) fav.style.color = "var(--red-600)";

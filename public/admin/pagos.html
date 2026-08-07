@@ -162,11 +162,20 @@
           <button class="btn btn-primary" type="button" onclick="verificar('${o.codigo}')">${A.icon("checkCircle")} Verificar y liberar</button>
           <button class="btn btn-ghost" type="button" onclick="rechazar('${o.codigo}')" style="color:var(--red-600);border-color:var(--red-100)">${A.icon("xCircle")} Rechazar</button>
           <a class="btn btn-ghost btn-sm" href="pedidos.html?codigo=${o.codigo}">Ver pedido completo</a>
-          <a class="btn btn-ghost btn-sm" href="https://wa.me/58${(o.cliente.telefono || "").replace(/[^0-9]/g, "").slice(1)}" target="_blank" rel="noopener">${A.icon("whatsapp")} Escribir al cliente</a>
+          <button class="btn btn-ghost btn-sm" type="button" onclick="avisarPagoVerificado('${o.codigo}')" style="color:var(--green-700)">${A.icon("whatsapp")} Avisar pago verificado</button>
         </div>
       </div>
     </div>`;
   }
+
+  /* Respaldo manual: por si el aviso automático de Evolution API no llega,
+     esto abre WhatsApp con el mensaje ya escrito para mandarlo a mano. */
+  window.avisarPagoVerificado = function (codigo) {
+    const o = A.orders.find(codigo);
+    if (!o || !o.cliente || !o.cliente.telefono) return;
+    const msj = `¡Hola ${o.cliente.nombre}! ✅ Verificamos el pago de tu pedido *${o.codigo}*. Ya lo estamos preparando. Gracias por comprar en Alfa.`;
+    A.abrirWhatsApp(o.cliente.telefono, msj);
+  };
 
   window.verificar = function (codigo) {
     const o = A.orders.find(codigo);
