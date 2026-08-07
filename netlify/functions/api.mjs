@@ -363,14 +363,17 @@ export default async (req, context) => {
 
       const totalTxt = `$${body.totales?.total ?? "?"}`;
       const telCliente = body.cliente?.telefono;
-      if (telCliente) {
-        await enviarWhatsApp(sb, telCliente,
-          `¡Hola ${body.cliente?.nombre || ""}! Recibimos tu pedido *${codigo}* por ${totalTxt}. Te avisamos apenas verifiquemos el pago. Gracias por comprar en Alfa 💻`,
-          codigo);
-      }
-      await notificarGrupoInterno(sb,
-        `🛒 Nuevo pedido *${codigo}* — ${totalTxt}\nCliente: ${body.cliente?.nombre || "?"}\nEntrega: ${body.entrega?.modo || "?"}`,
-        codigo);
+      const nombreCliente = body.cliente?.nombre || "";
+      await Promise.all([
+        telCliente
+          ? enviarWhatsApp(sb, telCliente,
+              `¡Hola${nombreCliente ? " " + nombreCliente : ""}! 👋 Gracias por comprar en *Alfa*. Ya recibimos tu pedido *${codigo}* por ${totalTxt}.\n\nEn cuanto verifiquemos tu pago te avisamos para que empecemos a prepararlo. Cualquier duda, aquí estamos. 💻`,
+              codigo)
+          : Promise.resolve(),
+        notificarGrupoInterno(sb,
+          `🛒 *Nuevo pedido* — ${codigo}\n👤 ${nombreCliente || "Cliente"}\n💵 ${totalTxt}\n🚚 ${body.entrega?.modo === "tienda" ? "Retiro en tienda" : "Delivery"}`,
+          codigo),
+      ]);
 
       return json(201, pedidoDesdeFila(fila));
     }
@@ -464,19 +467,25 @@ export default async (req, context) => {
           const antes = previoPorCodigo.get(o.codigo);
           if (!antes) continue; // pedido recién creado: ya se notificó en /pedido
           const tel = o.cliente?.telefono;
+          const nombre = o.cliente?.nombre || "";
+          const saludo = nombre ? `¡Hola ${nombre}!` : "¡Hola!";
           const enTienda = o.entrega?.modo === "tienda";
 
           if (antes.pago_estado !== "verificado" && o.pagoEstado === "verificado") {
-            if (tel) await enviarWhatsApp(sb, tel, `✅ Verificamos el pago de tu pedido *${o.codigo}*. ¡Ya lo estamos preparando!`, o.codigo);
+            if (tel) await enviarWhatsApp(sb, tel,
+              `${saludo} ✅ Ya verificamos el pago de tu pedido *${o.codigo}*. Lo estamos preparando con cariño, en breve te seguimos contando. ¡Gracias por tu compra! 💙`,
+              o.codigo);
           }
           if (antes.pago_estado !== "rechazado" && o.pagoEstado === "rechazado") {
-            if (tel) await enviarWhatsApp(sb, tel, `⚠️ No pudimos verificar el pago de tu pedido *${o.codigo}*${o.motivoRechazo ? ": " + o.motivoRechazo : ""}. Por favor contáctanos.`, o.codigo);
-            await notificarGrupoInterno(sb, `⚠️ Pago rechazado — pedido *${o.codigo}*`, o.codigo);
+            if (tel) await enviarWhatsApp(sb, tel,
+              `${saludo} No logramos verificar el pago de tu pedido *${o.codigo}*${o.motivoRechazo ? " — " + o.motivoRechazo : ""}. No te preocupes, escríbenos por aquí mismo y lo resolvemos juntos. 🙌`,
+              o.codigo);
+            await notificarGrupoInterno(sb, `⚠️ *Pago rechazado* — pedido ${o.codigo}\n👤 ${nombre || "Cliente"}`, o.codigo);
           }
           if (typeof o.estadoIndex === "number" && antes.estado_index !== o.estadoIndex && tel) {
             const etiquetas = enTienda
-              ? { 3: "🚚 Tu equipo va en camino a la tienda que elegiste.", 4: "📦 ¡Ya puedes pasar a retirar tu pedido!", 5: "✅ Retiraste tu pedido. ¡Gracias por comprar en Alfa!" }
-              : { 3: "🚚 Despachamos tu pedido, ya va en camino.", 4: "📍 El repartidor tiene tu paquete y te lo entrega hoy.", 5: "✅ Tu pedido fue entregado. ¡Gracias por comprar en Alfa!" };
+              ? { 3: `${saludo} 🚚 Tu equipo ya va en camino a la tienda que elegiste.`, 4: `${saludo} 📦 ¡Tu pedido ya está listo para retirar! Te esperamos.`, 5: `${saludo} ✅ Retiraste tu pedido, ¡que lo disfrutes! Gracias por comprar en Alfa 💙` }
+              : { 3: `${saludo} 🚚 Despachamos tu pedido, ya va en camino hacia ti.`, 4: `${saludo} 📍 El repartidor tiene tu paquete y te lo entrega hoy.`, 5: `${saludo} ✅ Tu pedido fue entregado. ¡Gracias por confiar en Alfa! 💙` };
             const msg = etiquetas[o.estadoIndex];
             if (msg) await enviarWhatsApp(sb, tel, `${msg}\nPedido *${o.codigo}*.`, o.codigo);
           }
