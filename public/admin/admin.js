@@ -50,10 +50,7 @@ window.ADM = (function () {
       <div class="login-card">
         <a class="logo" href="../index.html">
           <span class="logo-mark">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <path d="M32 13 L47 47 L41 47 L32 26 L23 47 L17 47 Z" fill="#fff"/>
-              <rect x="25" y="35" width="14" height="4.6" rx="2.3" fill="#fff"/>
-            </svg>
+            <img src="../assets/img/logo-mark.png" alt="" width="32" height="32">
           </span>
           <span class="logo-text">Alf<span>a</span></span>
         </a>
@@ -264,10 +261,7 @@ window.ADM = (function () {
       <aside class="adm-side" id="admSide">
         <div class="adm-brand">
           <span class="logo-mark">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <path d="M32 13 L47 47 L41 47 L32 26 L23 47 L17 47 Z" fill="#fff"/>
-              <rect x="25" y="35" width="14" height="4.6" rx="2.3" fill="#fff"/>
-            </svg>
+            <img src="../assets/img/logo-mark.png" alt="" width="32" height="32">
           </span>
           <span>
             <span class="logo-text">Alf<span>a</span></span>
