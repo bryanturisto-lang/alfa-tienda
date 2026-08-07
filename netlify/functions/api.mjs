@@ -53,7 +53,7 @@ async function enviarWhatsApp(sb, numeroDestino, texto, refPedido) {
   try {
     const controlador = new AbortController();
     const corte = setTimeout(() => controlador.abort(), 3000);
-    const resp = await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INSTANCIA}`, {
+    const resp = await fetch(`${EVOLUTION_URL}/message/sendText/${encodeURIComponent(EVOLUTION_INSTANCIA)}`, {
       method: "POST",
       headers: { "content-type": "application/json", apikey: EVOLUTION_APIKEY },
       body: JSON.stringify({ number: numero, text: texto }),
