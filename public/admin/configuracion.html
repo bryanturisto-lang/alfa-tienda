@@ -73,9 +73,31 @@
       </div>
 
       <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-muted);margin-bottom:12px">Zelle</h4>
-      <div class="grid-2">
+      <div class="grid-2" style="margin-bottom:24px">
         <div class="field"><label for="zlEmailCfg">Correo</label><input class="input" id="zlEmailCfg"></div>
         <div class="field"><label for="zlTitCfg">Titular</label><input class="input" id="zlTitCfg"></div>
+      </div>
+
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-muted);margin-bottom:12px">Binance (USDT)</h4>
+      <div class="grid-2" style="margin-bottom:24px">
+        <div class="field"><label for="bnIdCfg">Binance ID</label><input class="input mono" id="bnIdCfg"></div>
+        <div class="field"><label for="bnAliasCfg">Alias</label><input class="input" id="bnAliasCfg"></div>
+      </div>
+
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-muted);margin-bottom:12px">PayPal</h4>
+      <div class="grid-2" style="margin-bottom:24px">
+        <div class="field"><label for="ppEmailCfg">Correo</label><input class="input" id="ppEmailCfg"></div>
+        <div class="field"><label for="ppTitCfg">Titular</label><input class="input" id="ppTitCfg"></div>
+        <div class="field col-span-2"><label for="ppNotaCfg">Nota (opcional)</label><input class="input" id="ppNotaCfg" placeholder="Ej.: recuerda la comisión de PayPal"></div>
+      </div>
+
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-muted);margin-bottom:12px">Banesco Panamá</h4>
+      <div class="grid-2">
+        <div class="field"><label for="bpBancoCfg">Banco</label><input class="input" id="bpBancoCfg" value="Banesco Panamá"></div>
+        <div class="field"><label for="bpCuentaCfg">Número de cuenta</label><input class="input mono" id="bpCuentaCfg"></div>
+        <div class="field"><label for="bpTipoCfg">Tipo de cuenta</label>
+          <select class="select" id="bpTipoCfg"><option>Cuenta corriente</option><option>Cuenta de ahorro</option></select></div>
+        <div class="field"><label for="bpTitCfg">Titular</label><input class="input" id="bpTitCfg"></div>
       </div>
 
       <div class="row" style="gap:10px;margin-top:20px">
@@ -210,12 +232,24 @@
     $("tfTitCfg").value = CFG.transferencia.titular;
     $("zlEmailCfg").value = CFG.zelle.email;
     $("zlTitCfg").value = CFG.zelle.titular;
+    $("bnIdCfg").value = (CFG.binance || {}).id || "";
+    $("bnAliasCfg").value = (CFG.binance || {}).alias || "";
+    $("ppEmailCfg").value = (CFG.paypal || {}).email || "";
+    $("ppTitCfg").value = (CFG.paypal || {}).titular || "";
+    $("ppNotaCfg").value = (CFG.paypal || {}).nota || "";
+    $("bpBancoCfg").value = (CFG.banescoPanama || {}).banco || "Banesco Panamá";
+    $("bpCuentaCfg").value = (CFG.banescoPanama || {}).cuenta || "";
+    $("bpTipoCfg").value = (CFG.banescoPanama || {}).tipo || "Cuenta corriente";
+    $("bpTitCfg").value = (CFG.banescoPanama || {}).titular || "";
   }
 
   $("btnGuardarPagos").onclick = () => {
     CFG.pagoMovil = { banco: $("pmBancoCfg").value, telefono: $("pmTelCfg").value.trim(), rif: $("pmRifCfg").value.trim(), titular: $("pmTitCfg").value.trim() };
     CFG.transferencia = { banco: $("tfBancoCfg").value, cuenta: $("tfCuentaCfg").value.trim(), tipo: $("tfTipoCfg").value, titular: $("tfTitCfg").value.trim(), rif: CFG.pagoMovil.rif };
     CFG.zelle = { email: $("zlEmailCfg").value.trim(), titular: $("zlTitCfg").value.trim() };
+    CFG.binance = { id: $("bnIdCfg").value.trim(), alias: $("bnAliasCfg").value.trim() };
+    CFG.paypal = { email: $("ppEmailCfg").value.trim(), titular: $("ppTitCfg").value.trim(), nota: $("ppNotaCfg").value.trim() };
+    CFG.banescoPanama = { banco: $("bpBancoCfg").value.trim(), cuenta: $("bpCuentaCfg").value.trim(), tipo: $("bpTipoCfg").value, titular: $("bpTitCfg").value.trim() };
     A.guardarConfig();
     A.bitacora.add("config-pagos", "Se actualizaron los datos bancarios de la tienda");
     A.toast("Datos de pago actualizados", "checkCircle");
