@@ -346,11 +346,14 @@ export default async (req, context) => {
 
       // Descuenta el inventario de forma atómica.
       for (const it of body.items) {
-        await sb.rpc("descontar_stock", { p_id: it.id, p_cantidad: it.qty }).catch(async () => {
+        try {
+          const { error: errRpc } = await sb.rpc("descontar_stock", { p_id: it.id, p_cantidad: it.qty });
+          if (errRpc) throw errRpc;
+        } catch (e) {
           // Fallback si el RPC no existe: resta directa (menos seguro ante concurrencia extrema).
           const disponible = stockPorId.get(it.id) ?? 0;
           await sb.from("productos").update({ stock: Math.max(0, disponible - it.qty) }).eq("id", it.id);
-        });
+        }
       }
 
       await sb.from("bitacora").insert({
