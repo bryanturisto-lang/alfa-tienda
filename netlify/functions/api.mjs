@@ -337,12 +337,23 @@ export default async (req, context) => {
       }
 
       const codigo = body.codigo || generarCodigo();
-      const { data: existe } = await sb.from("pedidos").select("codigo").eq("codigo", codigo).maybeSingle();
-      if (existe) return error(409, "Ya existe un pedido con ese número.");
+      const { data: existente } = await sb.from("pedidos").select("*").eq("codigo", codigo).maybeSingle();
+      if (existente) {
+        // Ya existe (probablemente llegó por la sincronización paralela de la
+        // colección completa). No lo pisamos: devolvemos el que ya quedó guardado.
+        return json(201, pedidoDesdeFila(existente));
+      }
 
       const fila = filaDesdePedido({ ...body, codigo });
       const { error: errIns } = await sb.from("pedidos").insert(fila);
-      if (errIns) throw errIns;
+      if (errIns) {
+        if (errIns.code === "23505") {
+          // Carrera: alguien más lo insertó justo entre el chequeo y el insert.
+          const { data: actual } = await sb.from("pedidos").select("*").eq("codigo", codigo).maybeSingle();
+          if (actual) return json(201, pedidoDesdeFila(actual));
+        }
+        throw errIns;
+      }
 
       // Descuenta el inventario de forma atómica.
       for (const it of body.items) {
