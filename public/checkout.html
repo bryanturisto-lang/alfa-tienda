@@ -713,6 +713,8 @@
       });
 
       // El pago queda reportado; el equipo lo verifica desde el panel interno.
+      const avisoViejo = $("#avisoErrorPedido");
+      if (avisoViejo) avisoViejo.remove();
       A.recordarPedido(orden.codigo);
       A.cart.clear();
       pintarConfirmacion(orden);
