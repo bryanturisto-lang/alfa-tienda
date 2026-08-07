@@ -945,10 +945,7 @@
   <div class="wrap header-inner">
     <a class="logo" href="${bp}index.html" aria-label="Alfa — inicio">
       <span class="logo-mark">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <path d="M32 13 L47 47 L41 47 L32 26 L23 47 L17 47 Z" fill="#fff"/>
-          <rect x="25" y="35" width="14" height="4.6" rx="2.3" fill="#fff"/>
-        </svg>
+        <img src="${bp}assets/img/logo-mark.png" alt="" width="32" height="32">
       </span>
       <span class="logo-text">Alf<span>a</span></span>
     </a>

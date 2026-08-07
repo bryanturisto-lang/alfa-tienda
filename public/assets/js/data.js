@@ -20,8 +20,8 @@ ALFA.config = {
   freeShippingOver: 800,  // delivery gratis a partir de este monto en USD
 
   contact: {
-    phone: "+58 412-555-0110",
-    whatsapp: "584125550110",
+    phone: "+58 414-685-5453",
+    whatsapp: "584146855453",
     email: "hola@alfa.com.ve",
     rif: "J-50123456-7",
   },

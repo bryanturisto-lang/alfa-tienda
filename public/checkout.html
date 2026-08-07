@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Finalizar compra — Alfa</title>
 <meta name="description" content="Completa tu compra en Alfa: pago móvil, transferencia o Zelle, con delivery a domicilio o retiro en tienda.">
-<link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -487,10 +487,10 @@
 
       <div class="totals">
         <div class="total-row"><span>Subtotal</span><span>${A.fmtUSD(t.subtotal)}</span></div>
-        <div class="total-row">
-          <span>${S.modo === "delivery" ? "Envío · " + (zona ? zona.nombre.split("(")[0].trim() : "") : "Retiro en tienda"}</span>
+        ${S.modo === "delivery" ? `<div class="total-row">
+          <span>Envío · ${zona ? zona.nombre.split("(")[0].trim() : ""}</span>
           <span>${t.envioGratis ? '<span style="color:var(--green-600);font-weight:700">Gratis</span>' : t.envio === 0 ? "Sin costo" : A.fmtUSD(t.envio)}</span>
-        </div>
+        </div>` : ""}
         <div class="total-row"><span>IVA (16 %)</span><span>${A.fmtUSD(t.iva)}</span></div>
         ${t.descuento > 0 ? `<div class="total-row" style="color:var(--green-600)"><span>Descuento pago en Bs (5 %)</span><span>−${A.fmtUSD(t.descuento)}</span></div>` : ""}
         <div class="total-row is-grand"><span>Total</span><span>${A.fmtUSD(t.total)}</span></div>
@@ -763,7 +763,7 @@
         <p class="lead" style="margin-top:8px;max-width:52ch;margin-inline:auto">
           ${o.pago.metodo === "efectivo"
             ? "Reservamos tu equipo por 72 horas. Pagas en el mostrador al retirarlo."
-            : "Recibimos tu reporte de pago. Lo verificamos contra el estado de cuenta y te confirmamos por WhatsApp y correo."}
+            : "Recibimos tu reporte de pago. Lo verificamos contra el estado de cuenta y te confirmamos por WhatsApp."}
         </p>
         <div class="order-code">
           <div style="text-align:left">

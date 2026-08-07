@@ -4,16 +4,16 @@
    ========================================================= */
 
 :root {
-  /* Paleta */
-  --blue-900: #0a2540;
-  --blue-800: #0f3a63;
-  --blue-700: #14508a;
-  --blue-600: #1565d8;
-  --blue-500: #2b7cff;
-  --blue-400: #5b9bff;
-  --blue-300: #9cc2ff;
-  --blue-100: #e3edff;
-  --blue-50:  #f2f6ff;
+  /* Paleta — azul de marca Alfa (#003566) */
+  --blue-900: #001b33;
+  --blue-800: #002649;
+  --blue-700: #002b52;
+  --blue-600: #003566;
+  --blue-500: #0a4a85;
+  --blue-400: #3d6ea3;
+  --blue-300: #8fadc9;
+  --blue-100: #dce7f1;
+  --blue-50:  #f0f5f9;
 
   --white: #ffffff;
   --gray-50: #fafbfc;
@@ -58,7 +58,16 @@
   --ease: cubic-bezier(.22, .61, .36, 1);
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
+  --font-display: "ClashDisplay", var(--font);
 }
+
+/* ---------- Tipografía de marca: ClashDisplay (títulos y logo) ---------- */
+@font-face { font-family: "ClashDisplay"; src: url("../fonts/ClashDisplay-Regular.otf") format("opentype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "ClashDisplay"; src: url("../fonts/ClashDisplay-Medium.otf") format("opentype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "ClashDisplay"; src: url("../fonts/ClashDisplay-Semibold.otf") format("opentype"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "ClashDisplay"; src: url("../fonts/ClashDisplay-Bold.otf") format("opentype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "ClashDisplay"; src: url("../fonts/ClashDisplay-Light.otf") format("opentype"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "ClashDisplay"; src: url("../fonts/ClashDisplay-Extralight.otf") format("opentype"); font-weight: 200; font-display: swap; }
 
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -93,6 +102,7 @@ ul, ol { list-style: none; }
 
 /* ---------- Tipografía ---------- */
 h1, h2, h3, h4 {
+  font-family: var(--font-display);
   line-height: 1.15;
   letter-spacing: -.022em;
   font-weight: 700;
@@ -227,14 +237,13 @@ h4 { font-size: 1rem; }
 }
 .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .logo-mark {
-  width: 34px; height: 34px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--blue-500), var(--blue-700));
+  width: 32px; height: 32px;
   display: grid; place-items: center;
-  box-shadow: var(--shadow-blue);
 }
-.logo-mark svg { width: 19px; height: 19px; }
+.logo-mark img { width: 100%; height: 100%; object-fit: contain; }
 .logo-text {
-  font-size: 1.32rem; font-weight: 800; letter-spacing: -.04em;
+  font-family: var(--font-display);
+  font-size: 1.32rem; font-weight: 700; letter-spacing: -.02em;
   color: var(--brand-deep);
 }
 .logo-text span { color: var(--brand); }
