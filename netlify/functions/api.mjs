@@ -325,9 +325,10 @@ export default async (req, context) => {
 
       // El servidor no confía en el navegador: revalida stock antes de crear el pedido.
       const ids = body.items.map((it) => it.id);
-      const { data: filas, error: err } = await sb.from("productos").select("id, stock, precio").in("id", ids);
+      const { data: filas, error: err } = await sb.from("productos").select("id, nombre, stock, precio").in("id", ids);
       if (err) throw err;
       const stockPorId = new Map(filas.map((f) => [f.id, f.stock]));
+      const nombrePorId = new Map(filas.map((f) => [f.id, f.nombre]));
 
       for (const it of body.items) {
         const disponible = stockPorId.get(it.id) ?? 0;
@@ -356,15 +357,21 @@ export default async (req, context) => {
       }
 
       // Descuenta el inventario de forma atómica.
+      const UMBRAL_STOCK_BAJO = 3;
+      const alertasStock = [];
       for (const it of body.items) {
+        const disponible = stockPorId.get(it.id) ?? 0;
+        const restante = Math.max(0, disponible - it.qty);
         try {
           const { error: errRpc } = await sb.rpc("descontar_stock", { p_id: it.id, p_cantidad: it.qty });
           if (errRpc) throw errRpc;
         } catch (e) {
           // Fallback si el RPC no existe: resta directa (menos seguro ante concurrencia extrema).
-          const disponible = stockPorId.get(it.id) ?? 0;
-          await sb.from("productos").update({ stock: Math.max(0, disponible - it.qty) }).eq("id", it.id);
+          await sb.from("productos").update({ stock: restante }).eq("id", it.id);
         }
+        const nombre = nombrePorId.get(it.id) || it.id;
+        if (restante === 0) alertasStock.push(`🚫 *${nombre}* se quedó sin stock.`);
+        else if (restante <= UMBRAL_STOCK_BAJO) alertasStock.push(`⚠️ Stock bajo de *${nombre}*: quedan ${restante} unidades.`);
       }
 
       await sb.from("bitacora").insert({
@@ -387,6 +394,7 @@ export default async (req, context) => {
         notificarGrupoInterno(sb,
           `🛒 *Nuevo pedido recibido*\n📋 Orden: *${codigo}*\n👤 Cliente: *${nombreCliente || "Cliente"}*\n💵 Total: *${totalTxt}*\n🏪 Método de entrega: *${body.entrega?.modo === "tienda" ? "Retiro en tienda" : "Delivery"}*\n⏳ Estado: Pago pendiente de verificación.`,
           codigo),
+        ...alertasStock.map((msg) => notificarGrupoInterno(sb, msg, codigo)),
       ]);
 
       return json(201, { orden: pedidoDesdeFila(fila) });
